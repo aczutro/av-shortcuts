@@ -140,7 +140,13 @@ class MainClass:
             elif option == Opt.dry:
                 self.D[Key.dry] = None
             elif option == Opt.crop:
-                self.D[Key.crop] = self.makeCropString(*argument.split(':'))
+                cropArgs = argument.split(':')
+                if len(cropArgs) == 2:
+                    self.D[Key.crop] = self.makeCropString(
+                        cropArgs[0], cropArgs[0], cropArgs[1], cropArgs[1])
+                else:
+                    self.D[Key.crop] = self.makeCropString(*cropArgs)
+                #else
             elif option == Opt.scale:
                 self.D[Key.scale] = argument
             elif option == Opt.time:
@@ -331,14 +337,14 @@ if __name__ == '__main__':
             mp3 default is vbr with highest quality
         -%s:CRF
             default video quality is ffmpeg's default
-        -%s:CROP_LEFT:CROP_RIGHT:CROP_UP:CROP_DOWN
+        -%s:CROP_LEFT[:CROP_RIGHT]:CROP_UP[:CROP_DOWN]
         -%s:SCALE_FACTOR
         -%s:FROM:TO
             FROM or TO may be empty
 
 %s [ OPTIONS ] FILE ...
     options:
-        -%s:CROP_LEFT:CROP_RIGHT:CROP_UP:CROP_DOWN
+        -%s:CROP_LEFT[:CROP_RIGHT]:CROP_UP[:CROP_DOWN]
         -%s:SCALE_FACTOR
         -%s:FROM:TO
             FROM or TO may be empty
