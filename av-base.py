@@ -7,6 +7,8 @@
 ###############################################################################
 
 from sys import argv as __argv
+from os import \
+    remove as _rm
 from os.path import \
     basename as _basename, \
     exists as _exists
@@ -217,13 +219,26 @@ class MainClass:
     #def
 
 
+    def testExistence(self, filename):
+        '''tests whether a file exists, and if it does,
+         asks the user whether to overwrite;
+         if user answer yes, removes the file;
+         if user answers no, raises an exception'''
+        if _exists(filename):
+            if input("file %s already exists -- overwrite? " % filename) in [ 'y', 'Y', 'yes', 'YES' ]:
+                _rm(filename)
+            else:
+                raise Exception("file %s already exists -- aborting" % filename)
+            #if
+        #if
+    #def
+
+
     def avToAac(self):
         '''extracts aac stream from each input file'''
         for inputFile in self.lFiles:
             outputFile = self.deriveOutputName(inputFile, ['mp4'], 'aac')
-            if _exists(outputFile):
-                raise Exception("file %s already exists -- aborting" % outputFile)
-            #if
+            self.testExistence(outputFile)
             self.systemCall('ffmpeg', '-i', inputFile, '-c:a', 'copy', outputFile)
         #for
     #avExtractAac
@@ -234,9 +249,7 @@ class MainClass:
         self.scanOptions()
         for inputFile in self.lFiles:
             outputFile = self.deriveOutputName(inputFile, ['mp4', 'wav', 'mp3', 'aac'], 'mp3')
-            if _exists(outputFile):
-                raise Exception("file %s already exists -- aborting" % outputFile)
-            #if
+            self.testExistence(outputFile)
             command = [ 'ffmpeg', '-i', inputFile ] #, '-c:a', 'libmp3lame' ]
             if Key.ab in self.D:
                 command.extend([ '-b:a', self.D[Key.ab] ])
@@ -258,9 +271,7 @@ class MainClass:
         #if
         for inputFile in self.lFiles:
             outputFile = self.deriveOutputName(inputFile, ['avi', 'wmv', 'mov', 'mpg', 'mp4', 'ogv'], 'mp4')
-            if _exists(outputFile):
-                raise Exception("file %s already exists -- aborting" % outputFile)
-            #if
+            self.testExistence(outputFile)
             command = [ 'ffmpeg', '-i', inputFile ]
             if Key.crop in self.D:
                 command.extend([ '-vf', self.D[Key.crop] ])
@@ -303,9 +314,7 @@ class MainClass:
         #if
         for inputFile in self.lFiles:
             outputFile = self.deriveOutputName(inputFile, ['mp4'], 'mp4')
-            if _exists(outputFile):
-                raise Exception("file %s already exists -- aborting" % outputFile)
-            #if
+            self.testExistence(outputFile)
             command = [ 'ffmpeg', '-i', inputFile, '-c', 'copy' ] + self.D[Key.time] + [ outputFile ]
             self.systemCall(*command)
         #for
