@@ -15,12 +15,15 @@ from subprocess import \
     PIPE as _pipe, \
     call as _call
 
+from numpy.ma import outer
+
 
 class App:
     toAAC = 'av-to-aac'
     toMP3 = 'av-to-mp3'
     toMP4 = 'av-to-mp4'
     play = 'av-play'
+    cut = 'av-cut'
 #App
 
 
@@ -52,7 +55,8 @@ class MainClass:
             App.toAAC : self.avToAac,
             App.toMP3 : self.avToMp3,
             App.toMP4 : self.avToMp4,
-            App.play : self.avPlay
+            App.play : self.avPlay,
+            App.cut : self.avCut
         }
         self.D = dict()
     #def
@@ -290,6 +294,23 @@ class MainClass:
         #for
     #avToMp4
 
+
+    def avCut(self):
+        '''cuts out a section of video without transcoding'''
+        self.scanOptions()
+        if Key.time not in self.D:
+            raise Exception('-t is required')
+        #if
+        for inputFile in self.lFiles:
+            outputFile = self.deriveOutputName(inputFile, ['mp4'], 'mp4')
+            if _exists(outputFile):
+                raise Exception("file %s already exists -- aborting" % outputFile)
+            #if
+            command = [ 'ffmpeg', '-i', inputFile, '-c', 'copy' ] + self.D[Key.time] + [ outputFile ]
+            self.systemCall(*command)
+        #for
+    #avCut
+
     def avPlay(self):
         self.scanOptions()
         if Key.crop in self.D and Key.scale in self.D:
@@ -342,6 +363,8 @@ if __name__ == '__main__':
         -%s:FROM:TO
             FROM or TO may be empty
 
+%s -%s:FROM:TO FILE ...
+
 %s [ OPTIONS ] FILE ...
     options:
         -%s:CROP_LEFT[:CROP_RIGHT]:CROP_UP[:CROP_DOWN]
@@ -359,6 +382,7 @@ if __name__ == '__main__':
             Opt.crop,
             Opt.scale,
             Opt.time,
+            App.cut, Opt.time,
             App.play,
             Opt.crop,
             Opt.scale,
