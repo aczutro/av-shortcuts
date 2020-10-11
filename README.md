@@ -20,7 +20,7 @@ cd /usr/bin
 ln -s /path/to/av-base.py av-play
 ```
 
-The following four flavours are currently available:
+The following five flavours are currently available:
 
 * `av-to-aac`: extracts AAC audio from mp4 video.
 * `av-to-mp3`: extracts audio track from video and converts it to mp3.

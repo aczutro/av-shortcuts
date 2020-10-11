@@ -1,10 +1,25 @@
 #!/usr/bin/python3
 #
-# aczutro
+# av-shortcuts - FFmpeg wrapper with a simplified command line
 #
-# Sun Mar 29 19:22:21 CEST 2020
+# Copyright 2020 Alexander Czutro
 #
-###############################################################################
+# github@czutro.ch
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+################################################################### aczutro ###
 
 from sys import argv as __argv
 from os import \
@@ -34,6 +49,8 @@ class Opt:
     aq = 'aq'
     mp3 = 'mp3'
     aac = 'aac'
+    noaudio = 'noa'
+    copyaudio = 'copya'
     vq = 'vq'
     dry = 'dry'
     crop = 'c'
@@ -61,6 +78,7 @@ class MainClass:
             App.cut : self.avCut
         }
         self.D = dict()
+        self.D[Key.acodec] = 'aac'
     #def
 
 
@@ -141,6 +159,10 @@ class MainClass:
                 self.D[Key.acodec] = 'libmp3lame'
             elif option == Opt.aac:
                 self.D[Key.acodec] = 'aac'
+            elif option == Opt.copyaudio:
+                self.D[Key.acodec] = 'copy'
+            elif option == Opt.noaudio:
+                del self.D[Key.acodec]
             elif option == Opt.vq:
                 self.D[Key.crf] = argument
             elif option == Opt.dry:
@@ -360,8 +382,8 @@ if __name__ == '__main__':
     options:
         -%s
             don't do anything; only print ffmpeg command line
-        -%s | -%s
-            choose audio codec; if none chosen, produce NO audio
+        -%s | -%s | -%s | -%s
+            choose audio codec; default is AAC
         -%s:AUDIOBITRATE
             aac default is ffmpeg's default;
             mp3 default is vbr with highest quality
@@ -385,7 +407,7 @@ if __name__ == '__main__':
             App.toMP3, Opt.ab, Opt.aq,
             App.toMP4,
             Opt.dry,
-            Opt.aac, Opt.mp3,
+            Opt.aac, Opt.mp3, Opt.noaudio, Opt.copyaudio,
             Opt.ab,
             Opt.vq,
             Opt.crop,
