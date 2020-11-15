@@ -292,7 +292,7 @@ class MainClass:
             raise Exception('-c cannot be combined with -s')
         #if
         for inputFile in self.lFiles:
-            outputFile = self.deriveOutputName(inputFile, ['avi', 'wmv', 'mov', 'mpg', 'mp4', 'ogv'], 'mp4')
+            outputFile = self.deriveOutputName(inputFile, ['avi', 'wmv', 'mov', 'mpg', 'mp4', 'ogv', 'flv'], 'mp4')
             self.testExistence(outputFile)
             command = [ 'ffmpeg', '-i', inputFile ]
             if Key.crop in self.D:
