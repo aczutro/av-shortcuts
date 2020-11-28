@@ -286,7 +286,7 @@ class MainClass:
     #avExtractAac
 
     def avToMp4(self):
-        '''converts to mp4 with h.264 video and aac or mp3 audio'''
+        '''converts to mp4 with h.265 video and aac or mp3 audio'''
         self.scanOptions()
         if Key.crop in self.D and Key.scale in self.D:
             raise Exception('-c cannot be combined with -s')
@@ -301,7 +301,7 @@ class MainClass:
             if Key.scale in self.D:
                 command.extend(self.makeScaleString(inputFile, self.D[Key.scale]))
             #if
-            command.extend([ '-c:v', 'libx264' ])
+            command.extend([ '-c:v', 'libx265' ])
             if Key.acodec in self.D:
                 command.extend([ '-c:a', self.D[Key.acodec] ])
             else:
