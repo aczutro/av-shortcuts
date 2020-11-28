@@ -94,7 +94,6 @@ class MainClass:
     def systemCall(self, *args):
         '''Runs a non-interactive sub-process and
         returns its outputs and exit code.'''
-        print(' '.join(args))
         P = _child(args, stdin=None, stdout=_pipe, stderr=_pipe)
         stdout, stderr = P.communicate()
         if P.returncode: # command failed
@@ -236,7 +235,8 @@ class MainClass:
             #else
         #else
 
-        print(inputFile, '->', outputFile)
+        #print(inputFile, '->', outputFile)
+
         return outputFile
     #def
 
@@ -319,11 +319,11 @@ class MainClass:
                 command.extend(self.D[Key.time])
             #if
             command.append(outputFile)
-            if Key.dry in self.D:
-                print(' '.join(command))
-            else:                
-                self.systemCall(*command)
-            #else
+            print(' '.join(command))
+            if Key.dry not in self.D:
+                print(self.systemCall(*command))
+                print("=======================")
+            #if
         #for
     #avToMp4
 
