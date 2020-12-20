@@ -29,10 +29,7 @@ from os.path import \
     exists as _exists
 from subprocess import \
     Popen as _child, \
-    PIPE as _pipe, \
-    call as _call
-
-from numpy.ma import outer
+    PIPE as _pipe
 
 
 class App:
@@ -51,7 +48,7 @@ class Opt:
     aac = 'aac'
     noaudio = 'noa'
     copyaudio = 'copya'
-    vq = 'vq'
+    crf = 'crf'
     dry = 'dry'
     crop = 'c'
     time = 't'
@@ -74,8 +71,8 @@ class MainClass:
             App.toAAC : self.avToAac,
             App.toMP3 : self.avToMp3,
             App.toMP4 : self.avToMp4,
-            App.play : self.avPlay,
-            App.cut : self.avCut
+            App.play  : self.avPlay,
+            App.cut   : self.avCut
         }
         self.D = dict()
         self.D[Key.acodec] = 'aac'
@@ -92,11 +89,11 @@ class MainClass:
 
 
     def systemCall(self, *args):
-        '''Runs a non-interactive sub-process and
-        returns its outputs and exit code.'''
+        """Runs a non-interactive sub-process and
+        returns its outputs and exit code."""
         P = _child(args, stdin=None, stdout=_pipe, stderr=_pipe)
         stdout, stderr = P.communicate()
-        if P.returncode: # command failed
+        if P.returncode:  # command failed
             raise Exception(stderr.decode())
         else:
             print(stderr.decode())
@@ -162,7 +159,7 @@ class MainClass:
                 self.D[Key.acodec] = 'copy'
             elif option == Opt.noaudio:
                 del self.D[Key.acodec]
-            elif option == Opt.vq:
+            elif option == Opt.crf:
                 self.D[Key.crf] = argument
             elif option == Opt.dry:
                 self.D[Key.dry] = None
@@ -179,18 +176,18 @@ class MainClass:
             elif option == Opt.time:
                 fromTime, toTime = argument.split(':')
                 startTime, lengthTime = None, None
-                if not len(fromTime) + len(toTime): # -t::
+                if not len(fromTime) + len(toTime):  # -t::
                     raise Exception('-t: from and to MUST not be both empty')
-                elif len(fromTime) * len(toTime): # -t:from:to
+                elif len(fromTime) * len(toTime):  # -t:from:to
                     if float(fromTime) != 0:
                         startTime = fromTime
                     #if
                     lengthTime = str(float(toTime) - float(fromTime))
-                elif fromTime: # -t:from:
+                elif fromTime:  # -t:from:
                     if float(fromTime):
                         startTime = fromTime
                     #if
-                else: # -t::to
+                else:  # -t::to
                     lengthTime = toTime
                 #else
                 self.D[Key.time] = []
@@ -208,17 +205,17 @@ class MainClass:
 
 
     def deriveOutputName(self, inputFile, lInputTypes, outputType):
-        '''
+        """
         inputFile: string
         lInputTypes: list of strings
         outputType: string
         Constructs (and returns) a file name by replacing the input file's
         ending by outputType.  The input file's ending must be in lInputTypes.
-        '''
+        """
         lTokens = inputFile.split('.')
         outputFile = None
 
-        if len(lTokens) == 1: # no file ending
+        if len(lTokens) == 1:  # no file ending
             # in this version, not caring about file name extension
             #todo: find out file type based on content
             return '%s.%s' % (inputFile, outputType)
@@ -242,10 +239,10 @@ class MainClass:
 
 
     def testExistence(self, filename):
-        '''tests whether a file exists, and if it does,
+        """tests whether a file exists, and if it does,
          asks the user whether to overwrite;
          if user answer yes, removes the file;
-         if user answers no, raises an exception'''
+         if user answers no, raises an exception"""
         if _exists(filename):
             if input("file %s already exists -- overwrite? " % filename) in [ 'y', 'Y', 'yes', 'YES' ]:
                 _rm(filename)
@@ -257,7 +254,7 @@ class MainClass:
 
 
     def avToAac(self):
-        '''extracts aac stream from each input file'''
+        """extracts aac stream from each input file"""
         for inputFile in self.lFiles:
             outputFile = self.deriveOutputName(inputFile, ['mp4'], 'aac')
             self.testExistence(outputFile)
@@ -267,12 +264,12 @@ class MainClass:
 
 
     def avToMp3(self):
-        '''extracts audio stream from each input file and converts it to mp3'''
+        """extracts audio stream from each input file and converts it to mp3"""
         self.scanOptions()
         for inputFile in self.lFiles:
             outputFile = self.deriveOutputName(inputFile, ['mp4', 'wav', 'mp3', 'aac'], 'mp3')
             self.testExistence(outputFile)
-            command = [ 'ffmpeg', '-i', inputFile ] #, '-c:a', 'libmp3lame' ]
+            command = [ 'ffmpeg', '-i', inputFile ]  # , '-c:a', 'libmp3lame' ]
             if Key.ab in self.D:
                 command.extend([ '-b:a', self.D[Key.ab] ])
             elif Key.aq in self.D:
@@ -286,7 +283,7 @@ class MainClass:
     #avExtractAac
 
     def avToMp4(self):
-        '''converts to mp4 with h.265 video and aac or mp3 audio'''
+        """converts to mp4 with h.265 video and aac or mp3 audio"""
         self.scanOptions()
         if Key.crop in self.D and Key.scale in self.D:
             raise Exception('-c cannot be combined with -s')
@@ -302,14 +299,16 @@ class MainClass:
                 command.extend(self.makeScaleString(inputFile, self.D[Key.scale]))
             #if
             command.extend([ '-c:v', 'libx265' ])
+            if Key.crf in self.D:
+                command.extend([ '-crf', self.D[Key.crf] ])
+            else:
+                command.extend([ '-crf', "23" ])
+            #if
             if Key.acodec in self.D:
                 command.extend([ '-c:a', self.D[Key.acodec] ])
             else:
                 command.append('-an')
             #else
-            if Key.crf in self.D:
-                command.extend([ '-crf', self.D[Key.crf] ])
-            #if
             if Key.ab in self.D:
                 command.extend([ '-b:a', self.D[Key.ab] ])
             elif Key.acodec in self.D and self.D[Key.acodec] == 'libmp3lame':
@@ -329,7 +328,7 @@ class MainClass:
 
 
     def avCut(self):
-        '''cuts out a section of video without transcoding'''
+        """cuts out a section of video without transcoding"""
         self.scanOptions()
         if Key.time not in self.D:
             raise Exception('-t is required')
@@ -409,7 +408,7 @@ if __name__ == '__main__':
             Opt.dry,
             Opt.aac, Opt.mp3, Opt.noaudio, Opt.copyaudio,
             Opt.ab,
-            Opt.vq,
+            Opt.crf,
             Opt.crop,
             Opt.scale,
             Opt.time,
@@ -423,7 +422,7 @@ if __name__ == '__main__':
     # if
 
     appName = _basename(__argv[0])
-    #appName = App.play # for debugging
+    # appName = App.play # for debugging
 
     lFiles = []
     lOptions = []
