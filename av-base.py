@@ -302,7 +302,7 @@ class MainClass:
             if Key.crf in self.D:
                 command.extend([ '-crf', self.D[Key.crf] ])
             else:
-                command.extend([ '-crf', "23" ])
+                command.extend([ '-crf', '25' ])
             #if
             if Key.acodec in self.D:
                 command.extend([ '-c:a', self.D[Key.acodec] ])
