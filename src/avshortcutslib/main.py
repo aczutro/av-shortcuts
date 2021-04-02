@@ -1,6 +1,6 @@
 # av-shortcuts - FFmpeg wrapper with a simplified command line
 #
-# Copyright 2020 Alexander Czutro, github@czutro.ch
+# Copyright 2020 - 2021 Alexander Czutro, github@czutro.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
