@@ -1,10 +1,6 @@
-#!/usr/bin/python3
-#
 # av-shortcuts - FFmpeg wrapper with a simplified command line
 #
-# Copyright 2020 Alexander Czutro
-#
-# github@czutro.ch
+# Copyright 2020 Alexander Czutro, github@czutro.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,11 +29,11 @@ from subprocess import \
 
 
 class App:
-    toAAC = 'av-to-aac'
-    toMP3 = 'av-to-mp3'
-    toMP4 = 'av-to-mp4'
-    play = 'av-play'
-    cut = 'av-cut'
+    toAAC = 'av-to-aac.py'
+    toMP3 = 'av-to-mp3.py'
+    toMP4 = 'av-to-mp4.py'
+    play = 'av-play.py'
+    cut = 'av-cut.py'
 #App
 
 
@@ -369,8 +365,7 @@ class MainClass:
 
 # main ------------------------------------------------------------------------
 
-if __name__ == '__main__':
-
+def main():
     if len(__argv) == 1:
         print('''
 %s FILE ...
