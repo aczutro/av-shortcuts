@@ -448,3 +448,31 @@ def main():
         exit(3)
     #except
 #main
+
+
+def mainCut():
+    main()
+#mainCut
+
+
+def mainPlay():
+    main()
+#mainPlay
+
+
+def mainToAAC():
+    main()
+#mainToAAC
+
+
+def mainToMp3():
+    main()
+#mainToMp3
+
+
+def mainToMp4():
+    main()
+#mainToMp4
+
+
+# aczutro

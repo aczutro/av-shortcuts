@@ -19,8 +19,10 @@
 #
 ################################################################### aczutro ###
 
-import avshortcutslib.main
+from avshortcutslib import main
 
 if __name__ == '__main__':
-    avshortcutslib.main.main()
+    main.mainPlay()
 #if
+
+# aczutro
