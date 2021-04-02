@@ -17,6 +17,11 @@
 #
 ################################################################### aczutro ###
 
+import argparse
+import logging
+import os
+import sys
+
 from sys import argv as __argv
 from os import \
     remove as _rm
@@ -450,28 +455,124 @@ def main():
 #main
 
 
+
+
+
+
+
+################################################################################
+
+def _initLogging():
+    """Initialises logging.
+
+    :return: triple composed of function pointers for info, warning and
+             error.
+    """
+    logging.basicConfig(format="%(name)s: %(levelname)s: %(message)s",
+                        level="WARNING")
+    logger = logging.getLogger(os.path.basename(sys.argv[0]))
+    return logger.info, logger.warning, logger.error
+#getLogger
+
+
+
+
 def mainCut():
+    """main routine for av-cut"""
+
+    _INFO, _WARNING, _ERROR = _initLogging()
+
     main()
 #mainCut
 
 
 def mainPlay():
+    """main routine for av-play"""
+
+    _INFO, _WARNING, _ERROR = _initLogging()
+
     main()
 #mainPlay
 
 
 def mainToAAC():
+    """main routine for av-to-aac"""
+
+    _INFO, _WARNING, _ERROR = _initLogging()
+
     main()
 #mainToAAC
 
 
 def mainToMp3():
+    """main routine for av-to-mp3"""
+
+    _INFO, _WARNING, _ERROR = _initLogging()
+
     main()
 #mainToMp3
 
 
+def _parseCommandLine(appDescription: str):
+    """Parses command line and returns parsed arguments."""
+
+    parser = argparse.ArgumentParser(description=appDescription, add_help=True)
+
+    generalGroup = parser.add_argument_group(" general")
+    audioGroup = parser.add_argument_group(" audio")
+    videoGroup = parser.add_argument_group(" video")
+    transGroup = parser.add_argument_group(" transforms")
+
+    parser.add_argument("VIDEO_FILE",
+                        type=str,
+                        nargs="+",
+                        help="video files to process"
+                        )
+    generalGroup.add_argument("-dry",
+                              action="store_true",
+                              help="only print FFmpeg command line; don't execute it"
+                              )
+    audioGroup.add_argument("-aac",
+                            action="store_true",
+                            help="transcode audio to AAC (default)"
+                            )
+    audioGroup.add_argument("-mp3",
+                            action="store_true",
+                            help="transcode audio to MP3"
+                            )
+    audioGroup.add_argument("-noa",
+                            action="store_true",
+                            help="produce no audio track "
+                            )
+    audioGroup.add_argument("-copya",
+                            action="store_true",
+                            help="copy audio track from input file"
+                            )
+    audioGroup.add_argument("-ab",
+                            dest="AUDIO_BITRATE",
+                            type=str,
+                            help="bitrate for output audio track. "
+                                 "Defaults: if AAC, use FFmpeg's default; "
+                                 "if MP3, use VBR with highest quality."
+                            )
+    videoGroup.add_argument("-crf",
+                            dest="CONSTANT_RATE_FACTOR",
+                            type=str,
+                            help="quality parameter for output video track. "
+                                 "Default: FFmpeg's default (28 for h.265)."
+                            )
+
+    return parser.parse_args()
+#parseCommandLine
+
+
 def mainToMp4():
-    main()
+    """main routine for av-to-mp4"""
+
+    _INFO, _WARNING, _ERROR = _initLogging()
+    ARGS = _parseCommandLine("converts video files to mp4")
+
+    print(ARGS)
 #mainToMp4
 
 
