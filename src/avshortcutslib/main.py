@@ -561,6 +561,27 @@ def _parseCommandLine(appDescription: str):
                             help="quality parameter for output video track. "
                                  "Default: FFmpeg's default (28 for h.265)."
                             )
+    transGroup.add_argument("-c",
+                            dest="CROP_FORMAT",
+                            type=str,
+                            help="CROP_LEFT[:CROP_RIGHT]:CROP_UP[:CROP_DOWN] "
+                                 "If CROP_RIGHT *and* CROP_DOWN are left out, "
+                                 "it is assumed that CROP_RIGHT = CROP_LEFT "
+                                 "and CROP_DOWN = CROP_UP."
+                            )
+    transGroup.add_argument("-s",
+                            dest="SCALE_FACTOR",
+                            type=float,
+                            help="apply scale video filter."
+                            )
+    transGroup.add_argument("-t",
+                            dest="TIMESTAMPS",
+                            type=str,
+                            help="[START_TIME]:[END_TIME]  "
+                                 "START_TIME and END_TIME are in seconds. "
+                                 "If START_TIME is empty, START_TIME = 0. "
+                                 "If END_TIME is empty, END_TIME = end of stream."
+                            )
 
     return parser.parse_args()
 #parseCommandLine
