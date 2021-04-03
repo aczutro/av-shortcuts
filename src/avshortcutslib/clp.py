@@ -38,7 +38,7 @@ class OptionID:
 @dataclass
 class GeneralOptions:
     """Bundles general options for CommandLineParser"""
-    dry: bool = False
+    dry: bool
 #GeneralOptions
 
 
@@ -187,8 +187,7 @@ class CommandLineParser:
 
         Run parseCommandLine first!
         """
-        ans = GeneralOptions()
-        ans.dry = self.args.dry
+        ans = GeneralOptions(self.args.dry)
         return ans
     #
 
@@ -198,7 +197,7 @@ class CommandLineParser:
 
         Run parseCommandLine first!
         """
-        ans = AudioOptions()
+        ans = AudioOptions([])
         return ans
     #
 
@@ -208,7 +207,7 @@ class CommandLineParser:
 
         Run parseCommandLine first!
         """
-        ans = VideoOptions()
+        ans = VideoOptions([])
         return ans
     #
 
@@ -218,7 +217,7 @@ class CommandLineParser:
 
         Run parseCommandLine first!
         """
-        ans = TransformOptions()
+        ans = TransformOptions([], [], [])
         return ans
     #
 
