@@ -17,7 +17,8 @@
 #
 ################################################################### aczutro ###
 
-import argparse
+from . import clp
+
 import logging
 import os
 import sys
@@ -482,7 +483,9 @@ def mainCut():
 
     _INFO, _WARNING, _ERROR = _initLogging()
 
-    main()
+    CLP = clp.CommandLineParser("cuts out video between two timestamps (no transcoding)")
+    CLP.parseCommandLine([ clp.OptionID.T ])
+
 #mainCut
 
 
@@ -491,7 +494,10 @@ def mainPlay():
 
     _INFO, _WARNING, _ERROR = _initLogging()
 
-    main()
+    CLP = clp.CommandLineParser("plays video and offers a simplified way of specifying"
+                                "cropping and scaling parameters")
+    CLP.parseCommandLine([ clp.OptionID.C, clp.OptionID.S, clp.OptionID.T ])
+
 #mainPlay
 
 
@@ -500,7 +506,9 @@ def mainToAAC():
 
     _INFO, _WARNING, _ERROR = _initLogging()
 
-    main()
+    CLP = clp.CommandLineParser("extracts AAC audio from mp4 video")
+    CLP.parseCommandLine([])
+
 #mainToAAC
 
 
@@ -509,91 +517,40 @@ def mainToMp3():
 
     _INFO, _WARNING, _ERROR = _initLogging()
 
-    main()
+    CLP = clp.CommandLineParser("extracts audio track from audio or video file"
+                                "and converts it to mp3")
+    CLP.parseCommandLine([ clp.OptionID.AB, clp.OptionID.AQ ])
+
 #mainToMp3
 
 
-def _parseCommandLine(appDescription: str):
-    """Parses command line and returns parsed arguments."""
-
-    parser = argparse.ArgumentParser(description=appDescription, add_help=True)
-
-    generalGroup = parser.add_argument_group(" general")
-    audioGroup = parser.add_argument_group(" audio")
-    videoGroup = parser.add_argument_group(" video")
-    transGroup = parser.add_argument_group(" transforms")
-
-    parser.add_argument("VIDEO_FILE",
-                        type=str,
-                        nargs="+",
-                        help="video files to process"
-                        )
-    generalGroup.add_argument("-dry",
-                              action="store_true",
-                              help="only print FFmpeg command line; don't execute it"
-                              )
-    audioGroup.add_argument("-aac",
-                            action="store_true",
-                            help="transcode audio to AAC (default)"
-                            )
-    audioGroup.add_argument("-mp3",
-                            action="store_true",
-                            help="transcode audio to MP3"
-                            )
-    audioGroup.add_argument("-noa",
-                            action="store_true",
-                            help="produce no audio track "
-                            )
-    audioGroup.add_argument("-copya",
-                            action="store_true",
-                            help="copy audio track from input file"
-                            )
-    audioGroup.add_argument("-ab",
-                            dest="AUDIO_BITRATE",
-                            type=str,
-                            help="bitrate for output audio track. "
-                                 "Defaults: if AAC, use FFmpeg's default; "
-                                 "if MP3, use VBR with highest quality."
-                            )
-    videoGroup.add_argument("-crf",
-                            dest="CONSTANT_RATE_FACTOR",
-                            type=str,
-                            help="quality parameter for output video track. "
-                                 "Default: FFmpeg's default (28 for h.265)."
-                            )
-    transGroup.add_argument("-c",
-                            dest="CROP_FORMAT",
-                            type=str,
-                            help="CROP_LEFT[:CROP_RIGHT]:CROP_UP[:CROP_DOWN] "
-                                 "If CROP_RIGHT *and* CROP_DOWN are left out, "
-                                 "it is assumed that CROP_RIGHT = CROP_LEFT "
-                                 "and CROP_DOWN = CROP_UP."
-                            )
-    transGroup.add_argument("-s",
-                            dest="SCALE_FACTOR",
-                            type=float,
-                            help="apply scale video filter."
-                            )
-    transGroup.add_argument("-t",
-                            dest="TIMESTAMPS",
-                            type=str,
-                            help="[START_TIME]:[END_TIME]  "
-                                 "START_TIME and END_TIME are in seconds. "
-                                 "If START_TIME is empty, START_TIME = 0. "
-                                 "If END_TIME is empty, END_TIME = end of stream."
-                            )
-
-    return parser.parse_args()
-#parseCommandLine
 
 
 def mainToMp4():
     """main routine for av-to-mp4"""
 
     _INFO, _WARNING, _ERROR = _initLogging()
-    ARGS = _parseCommandLine("converts video files to mp4")
 
-    print(ARGS)
+    CLP = clp.CommandLineParser("converts video to mp4 using a set of sensible defaults")
+    CLP.parseCommandLine(clp.OptionID.all())
+
+    try:
+        genOpts = CLP.getGeneralOptions()
+        print(genOpts)
+
+        audioOpts = CLP.getAudioOptions()
+        print(audioOpts)
+
+        videoOpts = CLP.getVideoOptions()
+        print(videoOpts)
+
+        transOpts = CLP.getTransformOptions()
+        print(transOpts)
+
+    except Exception as e:
+        _ERROR(e)
+    #except
+
 #mainToMp4
 
 
