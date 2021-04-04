@@ -25,7 +25,7 @@ from dataclasses import dataclass
 
 @dataclass
 class GeneralSettings:
-    """bundles general settings
+    """general settings
     """
     dry: bool = False
 #GeneralSettings
@@ -33,7 +33,8 @@ class GeneralSettings:
 
 @dataclass
 class AudioSettings:
-    """Bundles audio settings"""
+    """audio settings
+    """
     noaudio: bool = False
     codec: str = None
     bitrate: str = None
@@ -43,14 +44,16 @@ class AudioSettings:
 
 @dataclass
 class VideoSettings:
-    """Bundles video settings"""
+    """video settings
+    """
     crf: str = None
 #VideoSettings
 
 
 @dataclass
 class TransformSettings:
-    """Bundles transform settings"""
+    """transform settings
+    """
     cropLeft: int = None
     cropRight: int = None
     cropUp: int = None

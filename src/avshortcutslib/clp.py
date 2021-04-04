@@ -43,14 +43,14 @@ class OptionID:
 class CommandLineParser:
     """command line parser"""
 
-    def __init__(self, appDescription: str, _INFO = None):
+    def __init__(self, appDescription: str, _info = None):
         """constructor
 
         :param appDescription:  app description for help text
         :param _INFO:           pointer to function for logging
         """
         self.appDescription = appDescription
-        self._INFO = _INFO
+        self._info = _info
         self.args = None
     #__init__
 
@@ -159,8 +159,8 @@ class CommandLineParser:
 
         self.args = parser.parse_args()
 
-        if(self._INFO):
-            self._INFO(self.args)
+        if(self._info):
+            self._info(self.args)
         #if
 
     #parseCommandLine
@@ -171,6 +171,7 @@ class CommandLineParser:
         """
         return self.args.INPUT_FILE
     #getPositionalArgs
+
 
     def getGeneralSettings(self) -> datastructs.GeneralSettings:
         """Returns general Settings.

@@ -19,42 +19,64 @@
 
 """main routines"""
 
+from . import application
+
 from . import clp
 from . import czlogging
 from . import execution
 
 
-def _main(executor, optionIDs: list, appDescription: str):
+def _main(appClass):
     """generic main routine
 
-    :param executor:        the executor
-    :param optionIDs:       option IDs to include in command line parser
-    :param appDescription:  app description for help text
+    :param appClass:   application class
     """
-    _INFO, _WARNING, _ERROR = czlogging.initLogging("INFO")
-
-    CLP = clp.CommandLineParser(appDescription, _INFO=_INFO)
-    CLP.parseCommandLine(optionIDs)
-
-    try:
-        inputFiles = CLP.getPositionalArgs()
-        _INFO(inputFiles)
-        general = CLP.getGeneralSettings()
-        _INFO(general)
-        audio = CLP.getAudioSettings()
-        _INFO(audio)
-        video = CLP.getVideoSettings()
-        _INFO(video)
-        transforms = CLP.getTransformSettings()
-        _INFO(transforms)
-
-    except Exception as e:
-        _ERROR(e)
-    #except
-
-    executor.execute(general, audio, video, transforms)
-
+    app = appClass()
+    app.parseCommandLine()
+    app.execute()
 #_main
+
+
+def mainToMp4():
+    """main routine for av-to-mp4
+    """
+    _main(application.ApplicationToMp4)
+#mainToMp4
+
+
+
+
+# def _main(executor, optionIDs: list, appDescription: str):
+#     """generic main routine
+#
+#     :param executor:        the executor
+#     :param optionIDs:       option IDs to include in command line parser
+#     :param appDescription:  app description for help text
+#     """
+#     _INFO, _WARNING, _ERROR = czlogging.initLogging("INFO")
+#
+#     CLP = clp.CommandLineParser(appDescription, _INFO=_INFO)
+#     CLP.parseCommandLine(optionIDs)
+#
+#     try:
+#         inputFiles = CLP.getPositionalArgs()
+#         _INFO(inputFiles)
+#         general = CLP.getGeneralSettings()
+#         _INFO(general)
+#         audio = CLP.getAudioSettings()
+#         _INFO(audio)
+#         video = CLP.getVideoSettings()
+#         _INFO(video)
+#         transforms = CLP.getTransformSettings()
+#         _INFO(transforms)
+#
+#     except Exception as e:
+#         _ERROR(e)
+#     #except
+#
+#     executor.execute(general, audio, video, transforms)
+#
+# #_main
 
 
 def mainCut():
@@ -97,15 +119,15 @@ def mainToMp3():
 #mainToMp3
 
 
-def mainToMp4():
-    """main routine for av-to-mp4
-    """
-    executor = execution.Executor(execution.ExecType.TOMP4)
-    optionIDs = clp.OptionID.all()
-    _main(executor, optionIDs,
-          "converts video to mp4 (h.265) using a set of sensible defaults")
-
-#mainToMp4
+# def mainToMp4():
+#     """main routine for av-to-mp4
+#     """
+#     executor = execution.Executor(execution.ExecType.TOMP4)
+#     optionIDs = clp.OptionID.all()
+#     _main(executor, optionIDs,
+#           "converts video to mp4 (h.265) using a set of sensible defaults")
+#
+# #mainToMp4
 
 
 ### aczutro ###################################################################
