@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-#
 # av-shortcuts - FFmpeg wrapper with a simplified command line
 #
 # Copyright 2020 - present Alexander Czutro, github@czutro.ch
