@@ -19,8 +19,10 @@
 
 """command line parser"""
 
+
+from . import datastructs
+
 import argparse
-from dataclasses import dataclass
 
 
 class OptionID:
@@ -36,44 +38,6 @@ class OptionID:
     #all
 
 #OptionID
-
-
-@dataclass
-class GeneralOptions:
-    """bundles general options for CommandLineParser
-    """
-    dry: bool = False
-#GeneralOptions
-
-
-@dataclass
-class AudioOptions:
-    """Bundles audio options for CommandLineParser"""
-    noaudio: bool = False
-    codec: str = None
-    bitrate: str = None
-    quality: str = None
-#AudioOptions
-
-
-@dataclass
-class VideoOptions:
-    """Bundles video options for CommandLineParser"""
-    crf: str = None
-#VideoOptions
-
-
-@dataclass
-class TransformOptions:
-    """Bundles transform options for CommandLineParser"""
-    cropLeft: int = None
-    cropRight: int = None
-    cropUp: int = None
-    cropDown: int = None
-    scaleFactor: float = None
-    timeStart: float = None
-    timeEnd: float = None
-#TransformOptions
 
 
 class CommandLineParser:
@@ -104,10 +68,10 @@ class CommandLineParser:
         videoGroup = parser.add_argument_group(" video")
         transGroup = parser.add_argument_group(" transforms")
 
-        parser.add_argument("VIDEO_FILE",
+        parser.add_argument("INPUT_FILE",
                             type=str,
                             nargs="+",
-                            help="video files to process"
+                            help="input files to process"
                             )
         if OptionID.DRY in IDs:
             generalGroup.add_argument("-dry",
@@ -202,22 +166,28 @@ class CommandLineParser:
     #parseCommandLine
 
 
-    def getGeneralOptions(self) -> GeneralOptions:
-        """Returns general options.
+    def getPositionalArgs(self) -> list:
+        """returns positional arguments
+        """
+        return self.args.INPUT_FILE
+    #getPositionalArgs
+
+    def getGeneralSettings(self) -> datastructs.GeneralSettings:
+        """Returns general Settings.
 
         Run parseCommandLine first!
         """
-        ans = GeneralOptions(self.args.dry)
+        ans = datastructs.GeneralSettings(self.args.dry)
         return ans
-    #getAudioOptions
+    #getAudioSettings
 
 
-    def getAudioOptions(self) -> AudioOptions:
-        """Returns audio options.
+    def getAudioSettings(self) -> datastructs.AudioSettings:
+        """Returns audio Settings.
 
         Run parseCommandLine first!
         """
-        ans = AudioOptions()
+        ans = datastructs.AudioSettings()
 
         counter = 0
         if self.args.mp3:
@@ -257,15 +227,15 @@ class CommandLineParser:
         #if
 
         return ans
-    #getAudioOptions
+    #getAudioSettings
 
 
-    def getVideoOptions(self) -> VideoOptions:
-        """Returns video options.
+    def getVideoSettings(self) -> datastructs.VideoSettings:
+        """Returns video Settings.
 
         Run parseCommandLine first!
         """
-        ans = VideoOptions()
+        ans = datastructs.VideoSettings()
 
         if self.args.CONSTANT_RATE_FACTOR is not None:
             if self.args.CONSTANT_RATE_FACTOR < 0 or self.args.CONSTANT_RATE_FACTOR > 51:
@@ -275,19 +245,19 @@ class CommandLineParser:
         #if
 
         return ans
-    #getVideoOptions
+    #getVideoSettings
 
 
-    def getTransformOptions(self) -> TransformOptions:
-        """Returns transform options.
+    def getTransformSettings(self) -> datastructs.TransformSettings:
+        """Returns transform Settings.
 
         Run parseCommandLine first!
         """
-        ans = TransformOptions()
+        ans = datastructs.TransformSettings()
         return ans
-    #getTransformOptions
+    #getTransformSettings
 
 #CommandLineParser
 
 
-# aczutro
+### aczutro ###################################################################
