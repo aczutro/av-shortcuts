@@ -20,3 +20,55 @@
 """FFmpeg wrapper with a simplified command line
 """
 __author__ = "Alexander Czutro, github@czutro.ch"
+
+
+from . import application
+
+
+def _main(appClass):
+    """generic main routine
+
+    :param appClass:  application class
+    """
+    app = appClass()
+    app.parseCommandLine()
+    app.execute()
+#_main
+
+
+def mainCut():
+    """main routine for av-cut
+    """
+    _main(application.ApplicationCut)
+#mainCut
+
+
+def mainPlay():
+    """main routine for av-play
+    """
+    _main(application.ApplicationPlay)
+#mainPlay
+
+
+def mainToAAC():
+    """main routine for av-to-aac
+    """
+    _main(application.ApplicationToAAC)
+#mainToAAC
+
+
+def mainToMp3():
+    """main routine for av-to-mp3
+    """
+    _main(application.ApplicationToMp3)
+#mainToMp3
+
+
+def mainToMp4():
+    """main routine for av-to-mp4
+    """
+    _main(application.ApplicationToMp4)
+#mainToMp4
+
+
+### aczutro ###################################################################

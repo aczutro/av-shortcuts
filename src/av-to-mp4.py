@@ -19,10 +19,10 @@
 #
 ################################################################### aczutro ###
 
-from avshortcutslib import main
+import avshortcutslib
 
 if __name__ == '__main__':
-    main.mainToMp4()
+    avshortcutslib.mainToMp4()
 #if
 
 ### aczutro ###################################################################

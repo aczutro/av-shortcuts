@@ -19,10 +19,10 @@
 #
 ################################################################### aczutro ###
 
-from avshortcutslib import main
+import avshortcutslib
 
 if __name__ == '__main__':
-    main.mainCut()
+    avshortcutslib.mainCut()
 #if
 
 ### aczutro ###################################################################
