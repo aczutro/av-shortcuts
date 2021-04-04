@@ -19,68 +19,82 @@
 
 """command line parser"""
 
-
 import argparse
 from dataclasses import dataclass
 
+
 class OptionID:
-    """enum class for CommandLineParser.parseCommandLine"""
+    """enum class for CommandLineParser.parseCommandLine
+    """
     DRY, AAC, MP3, NOA, COPYA, AB, AQ, CRF, C, S, T = range(11)
 
     @staticmethod
     def all():
-        """returns list that contains all elements of the enum"""
+        """returns list that contains all elements of the enum
+        """
         return range(11)
     #all
+
 #OptionID
 
 
 @dataclass
 class GeneralOptions:
-    """Bundles general options for CommandLineParser"""
-    dry: bool
+    """bundles general options for CommandLineParser
+    """
+    dry: bool = False
 #GeneralOptions
 
 
 @dataclass
 class AudioOptions:
     """Bundles audio options for CommandLineParser"""
-    command: list
+    noaudio: bool = False
+    codec: str = None
+    bitrate: str = None
+    quality: str = None
 #AudioOptions
 
 
 @dataclass
 class VideoOptions:
     """Bundles video options for CommandLineParser"""
-    video: list
+    crf: str = None
 #VideoOptions
 
 
 @dataclass
 class TransformOptions:
     """Bundles transform options for CommandLineParser"""
-    cropCommand: list
-    scaleCommand: list
-    timeCommand: list
+    cropLeft: int = None
+    cropRight: int = None
+    cropUp: int = None
+    cropDown: int = None
+    scaleFactor: float = None
+    timeStart: float = None
+    timeEnd: float = None
 #TransformOptions
 
 
 class CommandLineParser:
     """command line parser"""
 
-    def __init__(self, appDescription: str):
+    def __init__(self, appDescription: str, _INFO = None):
         """constructor
 
         :param appDescription:  app description for help text
+        :param _INFO:           pointer to function for logging
         """
         self.appDescription = appDescription
+        self._INFO = _INFO
         self.args = None
-    #def
+    #__init__
 
-    def parseCommandLine(self, IDs: list) -> argparse.Namespace:
+
+    def parseCommandLine(self, IDs: list, infoFPointer = None) -> argparse.Namespace:
         """Parses command line and returns parsed arguments.
 
-        :param IDs: list of OptionIDs to include
+        :param IDs:          list of OptionIDs to include
         """
         parser = argparse.ArgumentParser(description=self.appDescription,
                                          add_help=True)
@@ -129,25 +143,26 @@ class CommandLineParser:
             audioGroup.add_argument("-ab",
                                     dest="AUDIO_BITRATE",
                                     type=str,
-                                    help="bitrate for output audio track. "
-                                         "Defaults: if AAC, use FFmpeg's default; "
-                                         "if MP3, use VBR with highest quality."
+                                    help="bitrate for output audio track, e.g. '320k'. "
+                                         "Default: use VBR."
                                     )
         #if
         if OptionID.AQ in IDs:
             audioGroup.add_argument("-aq",
                                     dest="AUDIO_QUALITY",
-                                    type=str,
+                                    type=int,
                                     help="encode mp3 audio using VBR with this quality. "
-                                         "Default: use VBR with highest quality."
+                                         "0 is best, 9 is worst. "
+                                         "Default: 0"
                                     )
         #if
         if OptionID.CRF in IDs:
             videoGroup.add_argument("-crf",
                                     dest="CONSTANT_RATE_FACTOR",
-                                    type=str,
+                                    type=int,
                                     help="quality parameter for output video track. "
-                                         "Default: FFmpeg's default (28 for h.265)."
+                                         "0 is best, 51 is worst. "
+                                         "Default: FFmpeg's default (23 for h.264, 28 for h.265)."
                                     )
         #if
         if OptionID.C in IDs:
@@ -179,6 +194,11 @@ class CommandLineParser:
         #if
 
         self.args = parser.parse_args()
+
+        if(self._INFO):
+            self._INFO(self.args)
+        #if
+
     #parseCommandLine
 
 
@@ -189,7 +209,7 @@ class CommandLineParser:
         """
         ans = GeneralOptions(self.args.dry)
         return ans
-    #
+    #getAudioOptions
 
 
     def getAudioOptions(self) -> AudioOptions:
@@ -197,9 +217,47 @@ class CommandLineParser:
 
         Run parseCommandLine first!
         """
-        ans = AudioOptions([])
+        ans = AudioOptions()
+
+        counter = 0
+        if self.args.mp3:
+            counter += 1
+            ans.codec = 'libmp3lame'
+        #if
+        if self.args.aac:
+            counter += 1
+            ans.codec = 'aac'
+        #if
+        if self.args.copya:
+            counter += 1
+            ans.codec = 'copy'
+        #if
+        if self.args.noa:
+            counter += 1
+            ans.noaudio = True
+        #if
+        if counter > 1:
+            raise Exception("only one of -aac, -mp3, -noa and -copya allowed")
+        #if
+
+        counter = 0
+        if self.args.AUDIO_BITRATE is not None:
+            counter += 1
+            ans.bitrate = str(self.args.AUDIO_BITRATE)
+        #if
+        if self.args.AUDIO_QUALITY is not None:
+            if self.args.AUDIO_QUALITY < 0 or self.args.AUDIO_QUALITY > 9:
+                raise Exception("AUDIO_QUALITY must be between 0 and 9")
+            #if
+            counter += 1
+            ans.quality = self.args.AUDIO_QUALITY
+        #if
+        if counter > 1:
+            raise Exception("only one of -ab and -aq allowed")
+        #if
+
         return ans
-    #
+    #getAudioOptions
 
 
     def getVideoOptions(self) -> VideoOptions:
@@ -207,9 +265,17 @@ class CommandLineParser:
 
         Run parseCommandLine first!
         """
-        ans = VideoOptions([])
+        ans = VideoOptions()
+
+        if self.args.CONSTANT_RATE_FACTOR is not None:
+            if self.args.CONSTANT_RATE_FACTOR < 0 or self.args.CONSTANT_RATE_FACTOR > 51:
+                raise Exception("CONSTANT_RATE_FACTOR must be between 0 and 51")
+            #if
+            ans.crf = str(self.args.CONSTANT_RATE_FACTOR)
+        #if
+
         return ans
-    #
+    #getVideoOptions
 
 
     def getTransformOptions(self) -> TransformOptions:
@@ -217,9 +283,9 @@ class CommandLineParser:
 
         Run parseCommandLine first!
         """
-        ans = TransformOptions([], [], [])
+        ans = TransformOptions()
         return ans
-    #
+    #getTransformOptions
 
 #CommandLineParser
 

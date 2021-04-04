@@ -14,7 +14,8 @@ The following five applications are currently available:
 * `av-to-aac`: extracts AAC audio from mp4 video.
 * `av-to-mp3`: extracts audio track from audio or video file
                and converts it to mp3.
-* `av-to-mp4`: converts video to mp4 using a set of sensible defaults.
+* `av-to-mp4`: converts video to mp4 (h.265) using a set of sensible 
+               defaults.
 * `av-cut`:    cuts out video between two timestamps (no transcoding). 
 * `av-play`:   plays video and offers a simplified way of specifying
                cropping and scaling parameters.

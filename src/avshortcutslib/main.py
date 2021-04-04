@@ -18,8 +18,8 @@
 ################################################################### aczutro ###
 
 from . import clp
+from . import logging
 
-import logging
 import os
 import sys
 
@@ -463,93 +463,70 @@ def main():
 
 ################################################################################
 
-def _initLogging():
-    """Initialises logging.
+def _main(appDescription: str):
+    """generic main routine
 
-    :return: triple composed of function pointers for info, warning and
-             error.
+    :param appDescription:  app description for help text
     """
-    logging.basicConfig(format="%(name)s: %(levelname)s: %(message)s",
-                        level="WARNING")
-    logger = logging.getLogger(os.path.basename(sys.argv[0]))
-    return logger.info, logger.warning, logger.error
-#getLogger
+    _INFO, _WARNING, _ERROR = logging.initLogging("INFO")
 
+    CLP = clp.CommandLineParser(appDescription, _INFO=_INFO)
+    CLP.parseCommandLine(clp.OptionID.all())
 
+    try:
+        genOpts = CLP.getGeneralOptions()
+        _INFO(genOpts)
+        audioOpts = CLP.getAudioOptions()
+        _INFO(audioOpts)
+        videoOpts = CLP.getVideoOptions()
+        _INFO(videoOpts)
+        transOpts = CLP.getTransformOptions()
+        _INFO(transOpts)
+
+    except Exception as e:
+        _ERROR(e)
+    #except
+
+#_main
 
 
 def mainCut():
-    """main routine for av-cut"""
-
-    _INFO, _WARNING, _ERROR = _initLogging()
-
-    CLP = clp.CommandLineParser("cuts out video between two timestamps (no transcoding)")
-    CLP.parseCommandLine([ clp.OptionID.T ])
+    """main routine for av-cut
+    """
+    _main("cuts out video between two timestamps (no transcoding)")
 
 #mainCut
 
 
 def mainPlay():
-    """main routine for av-play"""
-
-    _INFO, _WARNING, _ERROR = _initLogging()
-
-    CLP = clp.CommandLineParser("plays video and offers a simplified way of specifying"
-                                "cropping and scaling parameters")
-    CLP.parseCommandLine([ clp.OptionID.C, clp.OptionID.S, clp.OptionID.T ])
+    """main routine for av-play
+    """
+    _main("plays video and offers a simplified way of specifying "
+          "cropping and scaling parameters")
 
 #mainPlay
 
 
 def mainToAAC():
-    """main routine for av-to-aac"""
-
-    _INFO, _WARNING, _ERROR = _initLogging()
-
-    CLP = clp.CommandLineParser("extracts AAC audio from mp4 video")
-    CLP.parseCommandLine([])
+    """main routine for av-to-aac
+    """
+    _main("extracts AAC audio from mp4 video")
 
 #mainToAAC
 
 
 def mainToMp3():
-    """main routine for av-to-mp3"""
-
-    _INFO, _WARNING, _ERROR = _initLogging()
-
-    CLP = clp.CommandLineParser("extracts audio track from audio or video file"
-                                "and converts it to mp3")
-    CLP.parseCommandLine([ clp.OptionID.AB, clp.OptionID.AQ ])
+    """main routine for av-to-mp3
+    """
+    _main("extracts audio track from audio or video file and converts it to mp3")
 
 #mainToMp3
 
 
-
-
 def mainToMp4():
-    """main routine for av-to-mp4"""
-
-    _INFO, _WARNING, _ERROR = _initLogging()
-
-    CLP = clp.CommandLineParser("converts video to mp4 using a set of sensible defaults")
-    CLP.parseCommandLine(clp.OptionID.all())
-
-    try:
-        genOpts = CLP.getGeneralOptions()
-        print(genOpts)
-
-        audioOpts = CLP.getAudioOptions()
-        print(audioOpts)
-
-        videoOpts = CLP.getVideoOptions()
-        print(videoOpts)
-
-        transOpts = CLP.getTransformOptions()
-        print(transOpts)
-
-    except Exception as e:
-        _ERROR(e)
-    #except
+    """main routine for av-to-mp4
+    """
+    _main("converts video to mp4 (h.265) using a set of sensible defaults")
 
 #mainToMp4
 
