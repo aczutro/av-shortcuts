@@ -25,43 +25,62 @@ from dataclasses import dataclass
 
 @dataclass
 class GeneralSettings:
-    """general settings
-    """
     dry: bool = False
 #GeneralSettings
 
 
 @dataclass
-class AudioSettings:
-    """audio settings
-    """
+class AudioCodecSettings:
     noaudio: bool = False
     codec: str = None
+#AudioCodecSettings
+
+
+@dataclass
+class AudioQualitySettings:
     bitrate: str = None
     quality: str = None
-#AudioSettings
+#AudioQualitySettings
 
 
 @dataclass
 class VideoSettings:
-    """video settings
-    """
     crf: str = None
 #VideoSettings
 
 
 @dataclass
-class TransformSettings:
-    """transform settings
-    """
+class CropSettings:
     cropLeft: int = None
     cropRight: int = None
     cropUp: int = None
     cropDown: int = None
+#CropSettings
+
+
+@dataclass
+class ScaleSettings:
     scaleFactor: float = None
+#ScaleSettings
+
+
+@dataclass
+class TimeSettings:
     timeStart: float = None
     timeEnd: float = None
-#TransformSettings
+#TimeSettings
+
+
+@dataclass
+class Settings:
+    general : GeneralSettings = None
+    audioCodec : AudioCodecSettings = None
+    audioQuality : AudioQualitySettings = None
+    video : VideoSettings = None
+    crop : CropSettings = None
+    scale : ScaleSettings = None
+    time : TimeSettings = None
+#Settings
 
 
 ### aczutro ###################################################################

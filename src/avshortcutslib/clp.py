@@ -27,33 +27,21 @@ import argparse
 
 class OptionID:
     """enum class for option groups
-
-    GENERAL:       include all general options
-    AUDIO_CODEC:   include all audio codec options
-    AUDIO_QUALITY: include all audio quality options
-    VIDEO:         include all video options
-    TRANS_CS:      include transform options -c and -s
-    TRANS_T:       include transform option -t
     """
     GENERAL, \
     AUDIO_CODEC, \
     AUDIO_QUALITY, \
     VIDEO, \
-    TRANS_CS, \
+    TRANS_C, \
+    TRANS_S, \
     TRANS_T \
-        = range(6)
+        = range(7)
 
     @staticmethod
     def all():
         """returns list that contains all elements of the enum
         """
-        return [ OptionID.GENERAL,
-                 OptionID.AUDIO_CODEC,
-                 OptionID.AUDIO_QUALITY,
-                 OptionID.VIDEO,
-                 OptionID.TRANS_CS,
-                 OptionID.TRANS_T
-                 ]
+        return range(7)
     #all
 
 #OptionID
@@ -72,11 +60,13 @@ class CommandLineParser:
         self.appDescription = appDescription
         self._info = _info
         self.optionIDs = optionIDs
+        self.args = []
+        self.settings = settings.Settings()
     #__init__
 
 
-    def parseCommandLine(self, infoFPointer = None) -> argparse.Namespace:
-        """Parses command line and returns parsed arguments.
+    def parseCommandLine(self):
+        """parses command line and stores the settings internally
 
         """
         parser = argparse.ArgumentParser(description=self.appDescription,
@@ -140,7 +130,7 @@ class CommandLineParser:
                                          "Default: FFmpeg's default (23 for h.264, 28 for h.265)."
                                     )
         #if
-        if OptionID.TRANS_CS in self.optionIDs:
+        if OptionID.TRANS_C in self.optionIDs:
             transGroup.add_argument("-c",
                                     dest="CROP_FORMAT",
                                     type=str,
@@ -149,6 +139,8 @@ class CommandLineParser:
                                          "it is assumed that CROP_RIGHT = CROP_LEFT "
                                          "and CROP_DOWN = CROP_UP."
                                     )
+        #if
+        if OptionID.TRANS_S in self.optionIDs:
             transGroup.add_argument("-s",
                                     dest="SCALE_FACTOR",
                                     type=float,
@@ -166,106 +158,151 @@ class CommandLineParser:
                                     )
         #if
 
-        self.args = parser.parse_args()
+        container = parser.parse_args()
 
         if(self._info):
-            self._info(self.args)
+            self._info(container)
         #if
 
+        self.args = container.INPUT_FILE
+
+        if OptionID.GENERAL in self.optionIDs:
+            self._deriveGeneralSettings(container)
+        #if
+        if OptionID.AUDIO_CODEC in self.optionIDs:
+            self._deriveAudioCodecSettings(container)
+        #if
+        if OptionID.AUDIO_QUALITY in self.optionIDs:
+            self._deriveAudioQualitySettings(container)
+        #if
+        if OptionID.VIDEO in self.optionIDs:
+            self._deriveVideoSettings(container)
+        #if
+        if OptionID.TRANS_C in self.optionIDs:
+            self._deriveCropSettings(container)
+        #if
+        if OptionID.TRANS_S in self.optionIDs:
+            self._deriveScaleSettings(container)
+        #if
+        if OptionID.TRANS_T in self.optionIDs:
+            self._deriveTimeSettings(container)
+        #if
     #parseCommandLine
 
 
-    def getPositionalArgs(self) -> list:
+    def getArgs(self) -> list:
         """returns positional arguments
         """
-        return self.args.INPUT_FILE
+        return self.args
     #getPositionalArgs
 
 
     def getGeneralSettings(self) -> settings.GeneralSettings:
-        """Returns general Settings.
-
-        Run parseCommandLine first!
-        """
-        ans = settings.GeneralSettings(self.args.dry)
-        return ans
+        return self.settings.general
     #getAudioSettings
 
 
-    def getAudioSettings(self) -> settings.AudioSettings:
-        """Returns audio Settings.
+    def getAudioCodecSettings(self) -> settings.AudioCodecSettings:
+        return self.settings.audioCodec
+    #getAudioCodecSettings
 
-        Run parseCommandLine first!
-        """
-        ans = settings.AudioSettings()
 
+    def getAudioQualitySettings(self) -> settings.AudioQualitySettings:
+        return self.settings.audioQuality
+    #getAudioQualitySettings
+
+
+    def getVideoSettings(self) -> settings.VideoSettings:
+        return self.settings.video
+    #getVideoSettings
+
+
+    def getCropSettings(self) -> settings.CropSettings:
+        return self.settings.crop
+    #getCropSettings
+
+
+    def getScaleSettings(self) -> settings.ScaleSettings:
+        return self.settings.scale
+    #getScaleSettings
+
+
+    def getTimeSettings(self) -> settings.TimeSettings:
+        return self.settings.time
+    #getTimeSettings
+
+
+    def _deriveGeneralSettings(self, container):
+        self.settings.general.dry = container.dry
+    #_deriveGeneralSettings
+
+
+    def _deriveAudioCodecSettings(self, container):
         counter = 0
-        if self.args.mp3:
+        if container.mp3:
             counter += 1
-            ans.codec = 'libmp3lame'
+            self.settings.audioCodec.codec = 'libmp3lame'
         #if
-        if self.args.aac:
+        if container.aac:
             counter += 1
-            ans.codec = 'aac'
+            self.settings.audioCodec.codec = 'aac'
         #if
-        if self.args.copya:
+        if container.copya:
             counter += 1
-            ans.codec = 'copy'
+            self.settings.audioCodec.codec = 'copy'
         #if
-        if self.args.noa:
+        if container.noa:
             counter += 1
-            ans.noaudio = True
+            self.settings.audioCodec.noaudio = True
         #if
         if counter > 1:
             raise Exception("only one of -aac, -mp3, -noa and -copya allowed")
         #if
+    #_deriveAudioCodecSettings
 
+
+    def _deriveAudioQualitySettings(self, container):
         counter = 0
-        if self.args.AUDIO_BITRATE is not None:
+        if container.AUDIO_BITRATE is not None:
             counter += 1
-            ans.bitrate = str(self.args.AUDIO_BITRATE)
+            self.settings.audioQuality.bitrate = str(container.AUDIO_BITRATE)
         #if
-        if self.args.AUDIO_QUALITY is not None:
-            if self.args.AUDIO_QUALITY < 0 or self.args.AUDIO_QUALITY > 9:
+        if container.AUDIO_QUALITY is not None:
+            if container.AUDIO_QUALITY < 0 or container.AUDIO_QUALITY > 9:
                 raise Exception("AUDIO_QUALITY must be between 0 and 9")
             #if
             counter += 1
-            ans.quality = self.args.AUDIO_QUALITY
+            self.settings.audioQuality.quality = container.AUDIO_QUALITY
         #if
         if counter > 1:
             raise Exception("only one of -ab and -aq allowed")
         #if
-
-        return ans
-    #getAudioSettings
+    #__deriveAudioQualitySettings
 
 
-    def getVideoSettings(self) -> settings.VideoSettings:
-        """Returns video Settings.
-
-        Run parseCommandLine first!
-        """
-        ans = settings.VideoSettings()
-
-        if self.args.CONSTANT_RATE_FACTOR is not None:
-            if self.args.CONSTANT_RATE_FACTOR < 0 or self.args.CONSTANT_RATE_FACTOR > 51:
+    def _deriveVideoSettings(self, container):
+        if container.CONSTANT_RATE_FACTOR is not None:
+            if container.CONSTANT_RATE_FACTOR < 0 or container.CONSTANT_RATE_FACTOR > 51:
                 raise Exception("CONSTANT_RATE_FACTOR must be between 0 and 51")
             #if
-            ans.crf = str(self.args.CONSTANT_RATE_FACTOR)
+            self.settings.video.crf = str(container.CONSTANT_RATE_FACTOR)
         #if
-
-        return ans
-    #getVideoSettings
+    #_deriveVideoSettings
 
 
-    def getTransformSettings(self) -> settings.TransformSettings:
-        """Returns transform Settings.
+    def _deriveCropSettings(self):
+        raise Exception("IMPLEMENT ME!")
+    #_deriveCropSettings
 
-        Run parseCommandLine first!
-        """
-        ans = settings.TransformSettings()
-        return ans
-    #getTransformSettings
+
+    def _deriveScaleSettings(self):
+        raise Exception("IMPLEMENT ME!")
+    #_deriveScaleSettings
+
+
+    def _deriveTimeSettings(self):
+        raise Exception("IMPLEMENT ME!")
+    #_deriveTimeSettings
 
 #CommandLineParser
 
