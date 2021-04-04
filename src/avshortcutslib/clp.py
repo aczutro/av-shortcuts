@@ -26,15 +26,34 @@ import argparse
 
 
 class OptionID:
-    """enum class for CommandLineParser.parseCommandLine
+    """enum class for option groups
+
+    GENERAL:       include all general options
+    AUDIO_CODEC:   include all audio codec options
+    AUDIO_QUALITY: include all audio quality options
+    VIDEO:         include all video options
+    TRANS_CS:      include transform options -c and -s
+    TRANS_T:       include transform option -t
     """
-    DRY, AAC, MP3, NOA, COPYA, AB, AQ, CRF, C, S, T = range(11)
+    GENERAL, \
+    AUDIO_CODEC, \
+    AUDIO_QUALITY, \
+    VIDEO, \
+    TRANS_CS, \
+    TRANS_T \
+        = range(6)
 
     @staticmethod
     def all():
         """returns list that contains all elements of the enum
         """
-        return range(11)
+        return [ OptionID.GENERAL,
+                 OptionID.AUDIO_CODEC,
+                 OptionID.AUDIO_QUALITY,
+                 OptionID.VIDEO,
+                 OptionID.TRANS_CS,
+                 OptionID.TRANS_T
+                 ]
     #all
 
 #OptionID
@@ -43,22 +62,22 @@ class OptionID:
 class CommandLineParser:
     """command line parser"""
 
-    def __init__(self, appDescription: str, _info = None):
+    def __init__(self, appDescription: str, optionIDs: list, _info = None):
         """constructor
 
         :param appDescription:  app description for help text
         :param _INFO:           pointer to function for logging
+        :param optionIDs:       list of OptionIDs to include
         """
         self.appDescription = appDescription
         self._info = _info
-        self.args = None
+        self.optionIDs = optionIDs
     #__init__
 
 
-    def parseCommandLine(self, IDs: list, infoFPointer = None) -> argparse.Namespace:
+    def parseCommandLine(self, infoFPointer = None) -> argparse.Namespace:
         """Parses command line and returns parsed arguments.
 
-        :param IDs:          list of OptionIDs to include
         """
         parser = argparse.ArgumentParser(description=self.appDescription,
                                          add_help=True)
@@ -73,45 +92,37 @@ class CommandLineParser:
                             nargs="+",
                             help="input files to process"
                             )
-        if OptionID.DRY in IDs:
+        if OptionID.GENERAL in self.optionIDs:
             generalGroup.add_argument("-dry",
                                       action="store_true",
                                       help="only print FFmpeg command line; don't execute it"
                                       )
         #if
-        if OptionID.AAC in IDs:
+        if OptionID.AUDIO_CODEC in self.optionIDs:
             audioGroup.add_argument("-aac",
                                     action="store_true",
                                     help="transcode audio to AAC (default)"
                                     )
-        #if
-        if OptionID.MP3 in IDs:
             audioGroup.add_argument("-mp3",
                                     action="store_true",
                                     help="transcode audio to MP3"
                                     )
-        #if
-        if OptionID.NOA in IDs:
             audioGroup.add_argument("-noa",
                                     action="store_true",
                                     help="produce no audio track "
                                     )
-        #if
-        if OptionID.COPYA in IDs:
             audioGroup.add_argument("-copya",
                                     action="store_true",
                                     help="copy audio track from input file"
                                     )
         #if
-        if OptionID.AB in IDs:
+        if OptionID.AUDIO_QUALITY in self.optionIDs:
             audioGroup.add_argument("-ab",
                                     dest="AUDIO_BITRATE",
                                     type=str,
                                     help="bitrate for output audio track, e.g. '320k'. "
                                          "Default: use VBR."
                                     )
-        #if
-        if OptionID.AQ in IDs:
             audioGroup.add_argument("-aq",
                                     dest="AUDIO_QUALITY",
                                     type=int,
@@ -120,7 +131,7 @@ class CommandLineParser:
                                          "Default: 0"
                                     )
         #if
-        if OptionID.CRF in IDs:
+        if OptionID.VIDEO in self.optionIDs:
             videoGroup.add_argument("-crf",
                                     dest="CONSTANT_RATE_FACTOR",
                                     type=int,
@@ -129,7 +140,7 @@ class CommandLineParser:
                                          "Default: FFmpeg's default (23 for h.264, 28 for h.265)."
                                     )
         #if
-        if OptionID.C in IDs:
+        if OptionID.TRANS_CS in self.optionIDs:
             transGroup.add_argument("-c",
                                     dest="CROP_FORMAT",
                                     type=str,
@@ -138,15 +149,13 @@ class CommandLineParser:
                                          "it is assumed that CROP_RIGHT = CROP_LEFT "
                                          "and CROP_DOWN = CROP_UP."
                                     )
-        #if
-        if OptionID.S in IDs:
             transGroup.add_argument("-s",
                                     dest="SCALE_FACTOR",
                                     type=float,
                                     help="apply scale video filter."
                                     )
         #if
-        if OptionID.T in IDs:
+        if OptionID.TRANS_T in self.optionIDs:
             transGroup.add_argument("-t",
                                     dest="TIMESTAMPS",
                                     type=str,

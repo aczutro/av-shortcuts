@@ -48,8 +48,9 @@ class Application:
     def parseCommandLine(self):
         """parses command line"""
 
-        CLP = clp.CommandLineParser(self.appDescription, _info=self._info)
-        CLP.parseCommandLine(self.optionIDs)
+        CLP = clp.CommandLineParser(self.appDescription, self.optionIDs,
+                                    _info=self._info)
+        CLP.parseCommandLine()
 
         try:
             self.inputFiles = CLP.getPositionalArgs()
@@ -65,17 +66,79 @@ class Application:
 
 
     def execute(self):
-        """executes all tasks"""
-        self._info(self.inputFiles)
-        self._info(self.general)
-        self._info(self.audio)
-        self._info(self.video)
-        self._info(self.transforms)
-
+        """executes all tasks
+        """
         self._error("execute: IMPLEMENT ME!")
     #execute
 
 #Application
+
+
+class ApplicationCut(Application):
+    """main application class for av-to-mp4
+
+    provides interface for command line parsing and task execution
+    """
+    def __init__(self):
+        """constructor
+        """
+        appDescription = "cuts out video between two timestamps (no transcoding)"
+        optionIDs = [ clp.OptionID.GENERAL, clp.OptionID.TRANS_T ]
+        super().__init__(appDescription, optionIDs)
+    #__init__
+
+#ApplicationCut
+
+
+class ApplicationPlay(Application):
+    """main application class for av-to-mp4
+
+    provides interface for command line parsing and task execution
+    """
+    def __init__(self):
+        """constructor
+        """
+        appDescription = "plays video and offers a simplified way of specifying "\
+                         "cropping and scaling parameters"
+        optionIDs = [ clp.OptionID.GENERAL,
+                      clp.OptionID.TRANS_CS, clp.OptionID.TRANS_T ]
+        super().__init__(appDescription, optionIDs)
+    #__init__
+
+#ApplicationPlay
+
+
+class ApplicationToAAC(Application):
+    """main application class for av-to-mp4
+
+    provides interface for command line parsing and task execution
+    """
+    def __init__(self):
+        """constructor
+        """
+        appDescription = "extracts AAC audio from video files"
+        optionIDs = [ clp.OptionID.GENERAL ]
+        super().__init__(appDescription, optionIDs)
+    #__init__
+
+#ApplicationToAAC
+
+
+class ApplicationToMp3(Application):
+    """main application class for av-to-mp4
+
+    provides interface for command line parsing and task execution
+    """
+    def __init__(self):
+        """constructor
+        """
+        appDescription = "extracts audio track from audio or video file "\
+                         "and converts it to mp3"
+        optionIDs = [ clp.OptionID.GENERAL, clp.OptionID.AUDIO_QUALITY ]
+        super().__init__(appDescription, optionIDs)
+    #__init__
+
+#ApplicationToMp3
 
 
 class ApplicationToMp4(Application):
@@ -83,14 +146,26 @@ class ApplicationToMp4(Application):
 
     provides interface for command line parsing and task execution
     """
-
     def __init__(self):
         """constructor
         """
-        appDescription = "converts video to mp4 (h.265) using a set of sensible defaults"
+        appDescription = "converts video to mp4 (h.265) using "\
+                         "a set of sensible defaults"
         optionIDs = clp.OptionID.all()
         super().__init__(appDescription, optionIDs)
     #__init__
+
+
+    def execute(self):
+        """executes all tasks
+        """
+        self._info(self.inputFiles)
+        self._info(self.general)
+        self._info(self.audio)
+        self._info(self.video)
+        self._info(self.transforms)
+
+    #execute
 
 #ApplicationToMp4
 

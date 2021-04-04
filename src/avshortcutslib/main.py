@@ -21,15 +21,11 @@
 
 from . import application
 
-from . import clp
-from . import czlogging
-from . import execution
-
 
 def _main(appClass):
     """generic main routine
 
-    :param appClass:   application class
+    :param appClass:  application class
     """
     app = appClass()
     app.parseCommandLine()
@@ -37,97 +33,39 @@ def _main(appClass):
 #_main
 
 
-def mainToMp4():
-    """main routine for av-to-mp4
-    """
-    _main(application.ApplicationToMp4)
-#mainToMp4
-
-
-
-
-# def _main(executor, optionIDs: list, appDescription: str):
-#     """generic main routine
-#
-#     :param executor:        the executor
-#     :param optionIDs:       option IDs to include in command line parser
-#     :param appDescription:  app description for help text
-#     """
-#     _INFO, _WARNING, _ERROR = czlogging.initLogging("INFO")
-#
-#     CLP = clp.CommandLineParser(appDescription, _INFO=_INFO)
-#     CLP.parseCommandLine(optionIDs)
-#
-#     try:
-#         inputFiles = CLP.getPositionalArgs()
-#         _INFO(inputFiles)
-#         general = CLP.getGeneralSettings()
-#         _INFO(general)
-#         audio = CLP.getAudioSettings()
-#         _INFO(audio)
-#         video = CLP.getVideoSettings()
-#         _INFO(video)
-#         transforms = CLP.getTransformSettings()
-#         _INFO(transforms)
-#
-#     except Exception as e:
-#         _ERROR(e)
-#     #except
-#
-#     executor.execute(general, audio, video, transforms)
-#
-# #_main
-
-
 def mainCut():
     """main routine for av-cut
     """
-    executor = execution.Executor(execution.ExecType.CUT)
-    _main(executor,
-          "cuts out video between two timestamps (no transcoding)")
+    _main(application.ApplicationCut)
 #mainCut
 
 
 def mainPlay():
     """main routine for av-play
     """
-    executor = execution.Executor(execution.ExecType.PLAY)
-    _main(executor,
-          "plays video and offers a simplified way of specifying "
-          "cropping and scaling parameters")
-
+    _main(application.ApplicationPlay)
 #mainPlay
 
 
 def mainToAAC():
     """main routine for av-to-aac
     """
-    executor = execution.Executor(execution.ExecType.TOAAC)
-    _main(executor,
-          "extracts AAC audio from mp4 video")
-
+    _main(application.ApplicationToAAC)
 #mainToAAC
 
 
 def mainToMp3():
     """main routine for av-to-mp3
     """
-    executor = execution.Executor(execution.ExecType.TOMP3)
-    _main(executor,
-          "extracts audio track from audio or video file and converts it to mp3")
-
+    _main(application.ApplicationToMp3)
 #mainToMp3
 
 
-# def mainToMp4():
-#     """main routine for av-to-mp4
-#     """
-#     executor = execution.Executor(execution.ExecType.TOMP4)
-#     optionIDs = clp.OptionID.all()
-#     _main(executor, optionIDs,
-#           "converts video to mp4 (h.265) using a set of sensible defaults")
-#
-# #mainToMp4
+def mainToMp4():
+    """main routine for av-to-mp4
+    """
+    _main(application.ApplicationToMp4)
+#mainToMp4
 
 
 ### aczutro ###################################################################
