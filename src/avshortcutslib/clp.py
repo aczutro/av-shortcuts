@@ -20,7 +20,7 @@
 """command line parser"""
 
 
-from . import datastructs
+from . import settings
 
 import argparse
 
@@ -182,22 +182,22 @@ class CommandLineParser:
     #getPositionalArgs
 
 
-    def getGeneralSettings(self) -> datastructs.GeneralSettings:
+    def getGeneralSettings(self) -> settings.GeneralSettings:
         """Returns general Settings.
 
         Run parseCommandLine first!
         """
-        ans = datastructs.GeneralSettings(self.args.dry)
+        ans = settings.GeneralSettings(self.args.dry)
         return ans
     #getAudioSettings
 
 
-    def getAudioSettings(self) -> datastructs.AudioSettings:
+    def getAudioSettings(self) -> settings.AudioSettings:
         """Returns audio Settings.
 
         Run parseCommandLine first!
         """
-        ans = datastructs.AudioSettings()
+        ans = settings.AudioSettings()
 
         counter = 0
         if self.args.mp3:
@@ -240,12 +240,12 @@ class CommandLineParser:
     #getAudioSettings
 
 
-    def getVideoSettings(self) -> datastructs.VideoSettings:
+    def getVideoSettings(self) -> settings.VideoSettings:
         """Returns video Settings.
 
         Run parseCommandLine first!
         """
-        ans = datastructs.VideoSettings()
+        ans = settings.VideoSettings()
 
         if self.args.CONSTANT_RATE_FACTOR is not None:
             if self.args.CONSTANT_RATE_FACTOR < 0 or self.args.CONSTANT_RATE_FACTOR > 51:
@@ -258,12 +258,12 @@ class CommandLineParser:
     #getVideoSettings
 
 
-    def getTransformSettings(self) -> datastructs.TransformSettings:
+    def getTransformSettings(self) -> settings.TransformSettings:
         """Returns transform Settings.
 
         Run parseCommandLine first!
         """
-        ans = datastructs.TransformSettings()
+        ans = settings.TransformSettings()
         return ans
     #getTransformSettings
 

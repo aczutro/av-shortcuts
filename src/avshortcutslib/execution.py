@@ -19,7 +19,7 @@
 
 """execution back-ends"""
 
-from . import datastructs
+from . import settings
 
 
 class ExecType:
@@ -54,10 +54,10 @@ class Executor:
 
 
     def execute(self,
-                general: datastructs.GeneralSettings,
-                audio: datastructs.AudioSettings,
-                video: datastructs.VideoSettings,
-                trans: datastructs.TransformSettings
+                general: settings.GeneralSettings,
+                audio: settings.AudioSettings,
+                video: settings.VideoSettings,
+                trans: settings.TransformSettings
                 ):
         """execute
 
@@ -71,10 +71,10 @@ class Executor:
 
 
     def _execCut(self,
-                 general: datastructs.GeneralSettings,
-                 audio: datastructs.AudioSettings,
-                 video: datastructs.VideoSettings,
-                 trans: datastructs.TransformSettings
+                 general: settings.GeneralSettings,
+                 audio: settings.AudioSettings,
+                 video: settings.VideoSettings,
+                 trans: settings.TransformSettings
                  ):
         """execution routine for av-cut
 
@@ -89,10 +89,10 @@ class Executor:
 
 
     def _execPlay(self,
-                  general: datastructs.GeneralSettings,
-                  audio: datastructs.AudioSettings,
-                  video: datastructs.VideoSettings,
-                  trans: datastructs.TransformSettings
+                  general: settings.GeneralSettings,
+                  audio: settings.AudioSettings,
+                  video: settings.VideoSettings,
+                  trans: settings.TransformSettings
                   ):
         """execution routine for av-play
 
@@ -107,10 +107,10 @@ class Executor:
 
 
     def _execToAAC(self,
-                   general: datastructs.GeneralSettings,
-                   audio: datastructs.AudioSettings,
-                   video: datastructs.VideoSettings,
-                   trans: datastructs.TransformSettings
+                   general: settings.GeneralSettings,
+                   audio: settings.AudioSettings,
+                   video: settings.VideoSettings,
+                   trans: settings.TransformSettings
                    ):
         """execution routine for av-to-aac
 
@@ -125,10 +125,10 @@ class Executor:
 
 
     def _execToMp3(self,
-                   general: datastructs.GeneralSettings,
-                   audio: datastructs.AudioSettings,
-                   video: datastructs.VideoSettings,
-                   trans: datastructs.TransformSettings
+                   general: settings.GeneralSettings,
+                   audio: settings.AudioSettings,
+                   video: settings.VideoSettings,
+                   trans: settings.TransformSettings
                    ):
         """execution routine for av-to-mp3
 
@@ -143,10 +143,10 @@ class Executor:
 
 
     def _execToMp4(self,
-                   general: datastructs.GeneralSettings,
-                   audio: datastructs.AudioSettings,
-                   video: datastructs.VideoSettings,
-                   trans: datastructs.TransformSettings
+                   general: settings.GeneralSettings,
+                   audio: settings.AudioSettings,
+                   video: settings.VideoSettings,
+                   trans: settings.TransformSettings
                    ):
         """execution routine for av-to-mp4
 

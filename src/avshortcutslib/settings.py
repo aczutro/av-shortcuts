@@ -17,7 +17,7 @@
 #
 ################################################################### aczutro ###
 
-"""data structures"""
+"""data structures to hold settings"""
 
 
 from dataclasses import dataclass
