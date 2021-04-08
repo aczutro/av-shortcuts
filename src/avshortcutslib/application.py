@@ -22,9 +22,6 @@
 from . import czlogging
 from . import clp
 
-import os.path
-import sys
-
 
 class Application:
     """base application class
@@ -38,46 +35,52 @@ class Application:
         :param appDescription:  app description for help text
         :param optionsIDs:      options to include in command line
         """
-        self.appName = os.path.basename(sys.argv[0])
+        self.L = czlogging.Logger("INFO")
         self.appDescription = appDescription
         self.optionIDs = optionsIDs
-        self._info, self._warning, self._error = czlogging.initLogging("INFO")
     #__init__
-
-
-    def parseCommandLine(self):
-        """parses command line"""
-
-        CLP = clp.CommandLineParser(self.appDescription, self.optionIDs,
-                                    _info=self._info)
-        CLP.parseCommandLine()
-
-        try:
-            self.inputFiles = CLP.getPositionalArgs()
-            self.general = CLP.getGeneralSettings()
-            self.audio = CLP.getAudioSettings()
-            self.video = CLP.getVideoSettings()
-            self.transforms = CLP.getTransformSettings()
-        except Exception as e:
-            self._error(e)
-        #except
-
-    #parseCommandLine
 
 
     def execute(self):
         """executes all tasks
         """
-        self._error("execute: IMPLEMENT ME!")
+        try:
+            self._parseCommandLine()
+            self._execute()
+        except Exception as e:
+            self.L.error(e)
+        #except
     #execute
+
+
+    def _parseCommandLine(self):
+        CLP = clp.CommandLineParser(self.appDescription, self.optionIDs,
+                                    fInfo=self.L.info)
+        CLP.parseCommandLine()
+
+        self.inputFiles = CLP.args
+        self.settings = CLP.settings
+
+        self.L.info(self.inputFiles)
+        self.L.info(self.settings.general)
+        self.L.info(self.settings.audioCodec)
+        self.L.info(self.settings.audioQuality)
+        self.L.info(self.settings.video)
+        self.L.info(self.settings.crop)
+        self.L.info(self.settings.scale)
+        self.L.info(self.settings.time)
+    #_parseCommandLine
+
+
+    def _execute(self):
+        raise Exception("%s._execute: IMPLEMENT ME!" % type(self).__name__)
+    #_execute
 
 #Application
 
 
 class ApplicationCut(Application):
     """main application class for av-to-mp4
-
-    provides interface for command line parsing and task execution
     """
     def __init__(self):
         """constructor
@@ -92,8 +95,6 @@ class ApplicationCut(Application):
 
 class ApplicationPlay(Application):
     """main application class for av-to-mp4
-
-    provides interface for command line parsing and task execution
     """
     def __init__(self):
         """constructor
@@ -101,7 +102,9 @@ class ApplicationPlay(Application):
         appDescription = "plays video and offers a simplified way of specifying "\
                          "cropping and scaling parameters"
         optionIDs = [ clp.OptionID.GENERAL,
-                      clp.OptionID.TRANS_CS, clp.OptionID.TRANS_T ]
+                      clp.OptionID.TRANS_C,
+                      clp.OptionID.TRANS_S,
+                      clp.OptionID.TRANS_T ]
         super().__init__(appDescription, optionIDs)
     #__init__
 
@@ -110,8 +113,6 @@ class ApplicationPlay(Application):
 
 class ApplicationToAAC(Application):
     """main application class for av-to-mp4
-
-    provides interface for command line parsing and task execution
     """
     def __init__(self):
         """constructor
@@ -126,8 +127,6 @@ class ApplicationToAAC(Application):
 
 class ApplicationToMp3(Application):
     """main application class for av-to-mp4
-
-    provides interface for command line parsing and task execution
     """
     def __init__(self):
         """constructor
@@ -143,8 +142,6 @@ class ApplicationToMp3(Application):
 
 class ApplicationToMp4(Application):
     """main application class for av-to-mp4
-
-    provides interface for command line parsing and task execution
     """
     def __init__(self):
         """constructor
@@ -154,18 +151,6 @@ class ApplicationToMp4(Application):
         optionIDs = clp.OptionID.all()
         super().__init__(appDescription, optionIDs)
     #__init__
-
-
-    def execute(self):
-        """executes all tasks
-        """
-        self._info(self.inputFiles)
-        self._info(self.general)
-        self._info(self.audio)
-        self._info(self.video)
-        self._info(self.transforms)
-
-    #execute
 
 #ApplicationToMp4
 

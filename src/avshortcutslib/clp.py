@@ -50,15 +50,15 @@ class OptionID:
 class CommandLineParser:
     """command line parser"""
 
-    def __init__(self, appDescription: str, optionIDs: list, _info = None):
+    def __init__(self, appDescription: str, optionIDs: list, fInfo = None):
         """constructor
 
         :param appDescription:  app description for help text
-        :param _INFO:           pointer to function for logging
+        :param _info:           pointer to function for logging
         :param optionIDs:       list of OptionIDs to include
         """
         self.appDescription = appDescription
-        self._info = _info
+        self.fInfo = fInfo
         self.optionIDs = optionIDs
         self.args = []
         self.settings = settings.Settings()
@@ -160,76 +160,48 @@ class CommandLineParser:
 
         container = parser.parse_args()
 
-        if(self._info):
-            self._info(container)
+        if(self.fInfo):
+            self.fInfo(container)
         #if
 
         self.args = container.INPUT_FILE
 
         if OptionID.GENERAL in self.optionIDs:
             self._deriveGeneralSettings(container)
-        #if
+        else:
+            self.settings.general = None
+        #else
         if OptionID.AUDIO_CODEC in self.optionIDs:
             self._deriveAudioCodecSettings(container)
-        #if
+        else:
+            self.settings.audioCodec = None
+        #else
         if OptionID.AUDIO_QUALITY in self.optionIDs:
             self._deriveAudioQualitySettings(container)
-        #if
+        else:
+            self.settings.audioQuality = None
+        #else
         if OptionID.VIDEO in self.optionIDs:
             self._deriveVideoSettings(container)
-        #if
+        else:
+            self.settings.video = None
+        #else
         if OptionID.TRANS_C in self.optionIDs:
             self._deriveCropSettings(container)
-        #if
+        else:
+            self.settings.crop = None
+        #else
         if OptionID.TRANS_S in self.optionIDs:
             self._deriveScaleSettings(container)
-        #if
+        else:
+            self.settings.scale = None
+        #else
         if OptionID.TRANS_T in self.optionIDs:
             self._deriveTimeSettings(container)
-        #if
+        else:
+            self.settings.time = None
+        #else
     #parseCommandLine
-
-
-    def getArgs(self) -> list:
-        """returns positional arguments
-        """
-        return self.args
-    #getPositionalArgs
-
-
-    def getGeneralSettings(self) -> settings.GeneralSettings:
-        return self.settings.general
-    #getAudioSettings
-
-
-    def getAudioCodecSettings(self) -> settings.AudioCodecSettings:
-        return self.settings.audioCodec
-    #getAudioCodecSettings
-
-
-    def getAudioQualitySettings(self) -> settings.AudioQualitySettings:
-        return self.settings.audioQuality
-    #getAudioQualitySettings
-
-
-    def getVideoSettings(self) -> settings.VideoSettings:
-        return self.settings.video
-    #getVideoSettings
-
-
-    def getCropSettings(self) -> settings.CropSettings:
-        return self.settings.crop
-    #getCropSettings
-
-
-    def getScaleSettings(self) -> settings.ScaleSettings:
-        return self.settings.scale
-    #getScaleSettings
-
-
-    def getTimeSettings(self) -> settings.TimeSettings:
-        return self.settings.time
-    #getTimeSettings
 
 
     def _deriveGeneralSettings(self, container):
@@ -290,18 +262,21 @@ class CommandLineParser:
     #_deriveVideoSettings
 
 
-    def _deriveCropSettings(self):
-        raise Exception("IMPLEMENT ME!")
+    def _deriveCropSettings(self, container):
+        pass
+        #raise Exception("IMPLEMENT ME!")
     #_deriveCropSettings
 
 
-    def _deriveScaleSettings(self):
-        raise Exception("IMPLEMENT ME!")
+    def _deriveScaleSettings(self, container):
+        pass
+        #raise Exception("IMPLEMENT ME!")
     #_deriveScaleSettings
 
 
-    def _deriveTimeSettings(self):
-        raise Exception("IMPLEMENT ME!")
+    def _deriveTimeSettings(self, container):
+        pass
+        #raise Exception("IMPLEMENT ME!")
     #_deriveTimeSettings
 
 #CommandLineParser

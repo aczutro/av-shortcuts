@@ -29,7 +29,7 @@ class Logger:
     to accept a variable number of arguments.
     """
 
-    def __init__(self, _level: str):
+    def __init__(self, _level: str = "WARNING"):
         """constructor
 
         :param _level:  minimum level to log
@@ -78,21 +78,6 @@ class Logger:
     #_log
 
 #Logger
-
-
-def initLogging(level: str = "WARNING"):
-    """Initialises logging.
-
-    :param level: minimum level to log
-
-    :return: triple composed of function pointers for info, warning and
-             error.
-    """
-    logger = Logger(level)
-
-    return logger.info, logger.warning, logger.error
-
-#initLogging
 
 
 ### aczutro ###################################################################

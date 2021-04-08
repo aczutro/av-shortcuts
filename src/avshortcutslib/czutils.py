@@ -1,6 +1,6 @@
 # av-shortcuts - FFmpeg wrapper with a simplified command line
 #
-# Copyright 2020 - present Alexander Czutro, github@czutro.ch
+# Copyright 2020 - 2021 Alexander Czutro, github@czutro.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,57 +17,24 @@
 #
 ################################################################### aczutro ###
 
-"""FFmpeg wrapper with a simplified command line
-"""
-__author__ = "Alexander Czutro, github@czutro.ch"
+"""nifty utilities"""
 
 
-from . import application
+def autoStr(cls):
+    """auto-generates __str__ method for class cls
 
+    Use like this:
 
-def _main(appClass):
-    """generic main routine
-
-    :param appClass:  application class
+    @autoStr
+    class MyClass:
+        ...
     """
-    app = appClass()
-    app.execute()
-#_main
-
-
-def mainCut():
-    """main routine for av-cut
-    """
-    _main(application.ApplicationCut)
-#mainCut
-
-
-def mainPlay():
-    """main routine for av-play
-    """
-    _main(application.ApplicationPlay)
-#mainPlay
-
-
-def mainToAAC():
-    """main routine for av-to-aac
-    """
-    _main(application.ApplicationToAAC)
-#mainToAAC
-
-
-def mainToMp3():
-    """main routine for av-to-mp3
-    """
-    _main(application.ApplicationToMp3)
-#mainToMp3
-
-
-def mainToMp4():
-    """main routine for av-to-mp4
-    """
-    _main(application.ApplicationToMp4)
-#mainToMp4
+    cls.__str__ = lambda self : \
+        "%s { %s }" \
+        % (type(self).__name__,
+           ", ".join("%s = %s" % dictEntry for dictEntry in vars(self).items()))
+    return cls
+#autoStr
 
 
 ### aczutro ###################################################################

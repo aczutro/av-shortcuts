@@ -19,67 +19,82 @@
 
 """data structures to hold settings"""
 
+from .czutils import autoStr
 
-from dataclasses import dataclass
 
-
-@dataclass
+@autoStr
 class GeneralSettings:
-    dry: bool = False
+    def __init__(self):
+        self.dry = False
+    #__init
 #GeneralSettings
 
 
-@dataclass
+@autoStr
 class AudioCodecSettings:
-    noaudio: bool = False
-    codec: str = None
+    def __init__(self):
+        self.noaudio = False
+        self.codec = None
+    #__init
 #AudioCodecSettings
 
 
-@dataclass
+@autoStr
 class AudioQualitySettings:
-    bitrate: str = None
-    quality: str = None
+    def __init__(self):
+        self.bitrate = None
+        self.quality = None
+    #__init
 #AudioQualitySettings
 
 
-@dataclass
+@autoStr
 class VideoSettings:
-    crf: str = None
+    def __init__(self):
+        self.crf = None
+    #__init
 #VideoSettings
 
 
-@dataclass
+@autoStr
 class CropSettings:
-    cropLeft: int = None
-    cropRight: int = None
-    cropUp: int = None
-    cropDown: int = None
+    def __init__(self):
+        self.cropLeft = None
+        self.cropRight = None
+        self.cropUp = None
+        self.cropDown = None
+    #__init
 #CropSettings
 
 
-@dataclass
+@autoStr
 class ScaleSettings:
-    scaleFactor: float = None
+    def __init__(self):
+        self.scaleFactor = None
+    #__init
 #ScaleSettings
 
 
-@dataclass
+@autoStr
 class TimeSettings:
-    timeStart: float = None
-    timeEnd: float = None
+    def __init__(self):
+        self.timeStart = None
+        self.timeEnd = None
+    #__init
 #TimeSettings
 
 
-@dataclass
+@autoStr
 class Settings:
-    general : GeneralSettings = None
-    audioCodec : AudioCodecSettings = None
-    audioQuality : AudioQualitySettings = None
-    video : VideoSettings = None
-    crop : CropSettings = None
-    scale : ScaleSettings = None
-    time : TimeSettings = None
+    def __init__(self):
+        self.general = GeneralSettings()
+        self.audioCodec = AudioCodecSettings()
+        self.audioQuality = AudioQualitySettings()
+        self.video = VideoSettings()
+        self.crop = CropSettings()
+        self.scale = ScaleSettings()
+        self.time = TimeSettings()
+    #__init__
 #Settings
 
 

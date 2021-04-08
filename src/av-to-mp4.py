@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/bin/env python3
 #
 # av-shortcuts - FFmpeg wrapper with a simplified command line
 #
