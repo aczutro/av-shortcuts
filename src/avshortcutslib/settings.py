@@ -59,10 +59,10 @@ class VideoSettings:
 @autoStr
 class CropSettings:
     def __init__(self):
-        self.cropLeft = None
-        self.cropRight = None
-        self.cropUp = None
-        self.cropDown = None
+        self.left = None
+        self.right = None
+        self.up = None
+        self.down = None
     #__init
 #CropSettings
 
@@ -70,7 +70,7 @@ class CropSettings:
 @autoStr
 class ScaleSettings:
     def __init__(self):
-        self.scaleFactor = None
+        self.factor = None
     #__init
 #ScaleSettings
 
@@ -78,8 +78,8 @@ class ScaleSettings:
 @autoStr
 class TimeSettings:
     def __init__(self):
-        self.timeStart = None
-        self.timeEnd = None
+        self.start = None
+        self.end = None
     #__init
 #TimeSettings
 

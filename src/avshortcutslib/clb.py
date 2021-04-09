@@ -17,147 +17,18 @@
 #
 ################################################################### aczutro ###
 
-"""execution back-ends"""
+"""ffmpeg command line builder"""
 
 from . import settings
 
 
-class ExecType:
-    """enum class for Executor instantiation
-    """
-    CUT, PLAY, TOAAC, TOMP3, TOMP4 = range(5)
-#ExecType
+class FFmpegConvertor:
 
-
-class Executor:
-
-    def __init__(self, type: ExecType):
-        """constructor
-
-        :param type: executor type
-        """
-
-        self._execute = None
-
-        if type == ExecType.CUT:
-            self._execute = self._execCut
-        elif type == ExecType.PLAY:
-            self._execute = self._execPlay
-        elif type == ExecType.TOAAC:
-            self._execute = self._execToAAC
-        elif type == ExecType.TOMP3:
-            self._execute = self._execToMp3
-        elif type == ExecType.TOMP4:
-            self._execute = self._execToMp4
-        #elif
+    def __init__(self):
+        pass
     #__init__
 
 
-    def execute(self,
-                general: settings.GeneralSettings,
-                audio: settings.AudioSettings,
-                video: settings.VideoSettings,
-                trans: settings.TransformSettings
-                ):
-        """execute
-
-        :param general:  general settings
-        :param audio:    audio settings
-        :param video:    video settings
-        :param trans:    transforms settings
-        """
-        self._execute(general, audio, video, trans)
-    #execute
-
-
-    def _execCut(self,
-                 general: settings.GeneralSettings,
-                 audio: settings.AudioSettings,
-                 video: settings.VideoSettings,
-                 trans: settings.TransformSettings
-                 ):
-        """execution routine for av-cut
-
-        :param general:  general settings
-        :param audio:    audio settings
-        :param video:    video settings
-        :param trans:    transforms settings
-        """
-        print("cut")
-
-    #_execCut
-
-
-    def _execPlay(self,
-                  general: settings.GeneralSettings,
-                  audio: settings.AudioSettings,
-                  video: settings.VideoSettings,
-                  trans: settings.TransformSettings
-                  ):
-        """execution routine for av-play
-
-        :param general:  general settings
-        :param audio:    audio settings
-        :param video:    video settings
-        :param trans:    transforms settings
-        """
-        print("play")
-
-    #_execPlay
-
-
-    def _execToAAC(self,
-                   general: settings.GeneralSettings,
-                   audio: settings.AudioSettings,
-                   video: settings.VideoSettings,
-                   trans: settings.TransformSettings
-                   ):
-        """execution routine for av-to-aac
-
-        :param general:  general settings
-        :param audio:    audio settings
-        :param video:    video settings
-        :param trans:    transforms settings
-        """
-        print("toaac")
-
-    #_execToAAC
-
-
-    def _execToMp3(self,
-                   general: settings.GeneralSettings,
-                   audio: settings.AudioSettings,
-                   video: settings.VideoSettings,
-                   trans: settings.TransformSettings
-                   ):
-        """execution routine for av-to-mp3
-
-        :param general:  general settings
-        :param audio:    audio settings
-        :param video:    video settings
-        :param trans:    transforms settings
-        """
-        print("tomp3")
-
-    #_execToMp3
-
-
-    def _execToMp4(self,
-                   general: settings.GeneralSettings,
-                   audio: settings.AudioSettings,
-                   video: settings.VideoSettings,
-                   trans: settings.TransformSettings
-                   ):
-        """execution routine for av-to-mp4
-
-        :param general:  general settings
-        :param audio:    audio settings
-        :param video:    video settings
-        :param trans:    transforms settings
-        """
-        print("tomp4")
-
-    #_execToMp4
 
 #class
 
@@ -246,7 +117,7 @@ class Executor:
 #
 #
 #     def makeCropString(self, _left, _right, _up, _down):
-#         left = int(_left)
+#         left = int(_left)ntRfyCgG6D
 #         right = int(_right)
 #         up = int(_up)
 #         down = int(_down)

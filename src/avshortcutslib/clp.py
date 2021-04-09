@@ -19,7 +19,6 @@
 
 """command line parser"""
 
-
 from . import settings
 
 import argparse
@@ -42,19 +41,20 @@ class OptionID:
         """returns list that contains all elements of the enum
         """
         return range(7)
-    #all
+    # all
 
-#OptionID
+
+# OptionID
 
 
 class CommandLineParser:
     """command line parser"""
 
-    def __init__(self, appDescription: str, optionIDs: list, fInfo = None):
+    def __init__(self, appDescription: str, optionIDs: list, fInfo=None):
         """constructor
 
         :param appDescription:  app description for help text
-        :param _info:           pointer to function for logging
+        :param fInfo:           pointer to function for logging
         :param optionIDs:       list of OptionIDs to include
         """
         self.appDescription = appDescription
@@ -62,8 +62,8 @@ class CommandLineParser:
         self.optionIDs = optionIDs
         self.args = []
         self.settings = settings.Settings()
-    #__init__
 
+    # __init__
 
     def parseCommandLine(self):
         """parses command line and stores the settings internally
@@ -87,7 +87,7 @@ class CommandLineParser:
                                       action="store_true",
                                       help="only print FFmpeg command line; don't execute it"
                                       )
-        #if
+        # if
         if OptionID.AUDIO_CODEC in self.optionIDs:
             audioGroup.add_argument("-aac",
                                     action="store_true",
@@ -105,7 +105,7 @@ class CommandLineParser:
                                     action="store_true",
                                     help="copy audio track from input file"
                                     )
-        #if
+        # if
         if OptionID.AUDIO_QUALITY in self.optionIDs:
             audioGroup.add_argument("-ab",
                                     dest="AUDIO_BITRATE",
@@ -120,7 +120,7 @@ class CommandLineParser:
                                          "0 is best, 9 is worst. "
                                          "Default: 0"
                                     )
-        #if
+        # if
         if OptionID.VIDEO in self.optionIDs:
             videoGroup.add_argument("-crf",
                                     dest="CONSTANT_RATE_FACTOR",
@@ -129,7 +129,7 @@ class CommandLineParser:
                                          "0 is best, 51 is worst. "
                                          "Default: FFmpeg's default (23 for h.264, 28 for h.265)."
                                     )
-        #if
+        # if
         if OptionID.TRANS_C in self.optionIDs:
             transGroup.add_argument("-c",
                                     dest="CROP_FORMAT",
@@ -139,14 +139,14 @@ class CommandLineParser:
                                          "it is assumed that CROP_RIGHT = CROP_LEFT "
                                          "and CROP_DOWN = CROP_UP."
                                     )
-        #if
+        # if
         if OptionID.TRANS_S in self.optionIDs:
             transGroup.add_argument("-s",
                                     dest="SCALE_FACTOR",
                                     type=float,
                                     help="apply scale video filter."
                                     )
-        #if
+        # if
         if OptionID.TRANS_T in self.optionIDs:
             transGroup.add_argument("-t",
                                     dest="TIMESTAMPS",
@@ -156,13 +156,13 @@ class CommandLineParser:
                                          "If START_TIME is empty, START_TIME = 0. "
                                          "If END_TIME is empty, END_TIME = end of stream."
                                     )
-        #if
+        # if
 
         container = parser.parse_args()
 
-        if(self.fInfo):
+        if self.fInfo is not None:
             self.fInfo(container)
-        #if
+        # if
 
         self.args = container.INPUT_FILE
 
@@ -170,116 +170,133 @@ class CommandLineParser:
             self._deriveGeneralSettings(container)
         else:
             self.settings.general = None
-        #else
+        # else
         if OptionID.AUDIO_CODEC in self.optionIDs:
             self._deriveAudioCodecSettings(container)
         else:
             self.settings.audioCodec = None
-        #else
+        # else
         if OptionID.AUDIO_QUALITY in self.optionIDs:
             self._deriveAudioQualitySettings(container)
         else:
             self.settings.audioQuality = None
-        #else
+        # else
         if OptionID.VIDEO in self.optionIDs:
             self._deriveVideoSettings(container)
         else:
             self.settings.video = None
-        #else
+        # else
         if OptionID.TRANS_C in self.optionIDs:
             self._deriveCropSettings(container)
         else:
             self.settings.crop = None
-        #else
+        # else
         if OptionID.TRANS_S in self.optionIDs:
             self._deriveScaleSettings(container)
         else:
             self.settings.scale = None
-        #else
+        # else
         if OptionID.TRANS_T in self.optionIDs:
             self._deriveTimeSettings(container)
         else:
             self.settings.time = None
-        #else
-    #parseCommandLine
+        # else
 
+    # parseCommandLine
 
     def _deriveGeneralSettings(self, container):
         self.settings.general.dry = container.dry
-    #_deriveGeneralSettings
 
+    # _deriveGeneralSettings
 
     def _deriveAudioCodecSettings(self, container):
         counter = 0
         if container.mp3:
             counter += 1
             self.settings.audioCodec.codec = 'libmp3lame'
-        #if
+        # if
         if container.aac:
             counter += 1
             self.settings.audioCodec.codec = 'aac'
-        #if
+        # if
         if container.copya:
             counter += 1
             self.settings.audioCodec.codec = 'copy'
-        #if
+        # if
         if container.noa:
             counter += 1
             self.settings.audioCodec.noaudio = True
-        #if
+        # if
         if counter > 1:
             raise Exception("only one of -aac, -mp3, -noa and -copya allowed")
-        #if
-    #_deriveAudioCodecSettings
+        # if
 
+    # _deriveAudioCodecSettings
 
     def _deriveAudioQualitySettings(self, container):
         counter = 0
         if container.AUDIO_BITRATE is not None:
             counter += 1
             self.settings.audioQuality.bitrate = str(container.AUDIO_BITRATE)
-        #if
+        # if
         if container.AUDIO_QUALITY is not None:
             if container.AUDIO_QUALITY < 0 or container.AUDIO_QUALITY > 9:
                 raise Exception("AUDIO_QUALITY must be between 0 and 9")
-            #if
+            # if
             counter += 1
             self.settings.audioQuality.quality = container.AUDIO_QUALITY
-        #if
+        # if
         if counter > 1:
             raise Exception("only one of -ab and -aq allowed")
-        #if
-    #__deriveAudioQualitySettings
+        # if
 
+    # __deriveAudioQualitySettings
 
     def _deriveVideoSettings(self, container):
         if container.CONSTANT_RATE_FACTOR is not None:
             if container.CONSTANT_RATE_FACTOR < 0 or container.CONSTANT_RATE_FACTOR > 51:
                 raise Exception("CONSTANT_RATE_FACTOR must be between 0 and 51")
-            #if
+            # if
             self.settings.video.crf = str(container.CONSTANT_RATE_FACTOR)
-        #if
-    #_deriveVideoSettings
+        # if
 
+    # _deriveVideoSettings
 
     def _deriveCropSettings(self, container):
-        pass
-        #raise Exception("IMPLEMENT ME!")
-    #_deriveCropSettings
-
+        if container.CROP_FORMAT is not None:
+            tokens = container.CROP_FORMAT.split(":")
+            try:
+                if len(tokens) == 2:
+                    self.settings.crop.left = int(tokens[0])
+                    self.settings.crop.right = int(tokens[0])
+                    self.settings.crop.up = int(tokens[1])
+                    self.settings.crop.down = int(tokens[1])
+                elif len(tokens) == 4:
+                    self.settings.crop = (int(t) for t in tokens)
+                else:
+                    raise Exception("bad number of tokens: CROP_FORMAT")
+                #else
+            except ValueError as v:
+                raise Exception(v)
+            #except
+            if min(( t >= 0 for t in self.settings.crop)) == False:
+                raise Exception("bad CROP_FORMAT: negative value")
+            #if
+        # if
+    # _deriveCropSettings
 
     def _deriveScaleSettings(self, container):
         pass
-        #raise Exception("IMPLEMENT ME!")
-    #_deriveScaleSettings
+        # raise Exception("IMPLEMENT ME!")
 
+    # _deriveScaleSettings
 
     def _deriveTimeSettings(self, container):
         pass
-        #raise Exception("IMPLEMENT ME!")
-    #_deriveTimeSettings
+        # raise Exception("IMPLEMENT ME!")
+    # _deriveTimeSettings
 
-#CommandLineParser
+# CommandLineParser
 
 
 ### aczutro ###################################################################
