@@ -6,7 +6,7 @@ Copyright 2020 - 2021 Alexander Czutro, github@czutro.ch
 
 ## Description
 
-Command line application that provides a more user-friendly
+Command line applications that provide a more user-friendly
 interface to some often-used FFmpeg functionality.
 
 The following five applications are currently available:
@@ -22,29 +22,22 @@ The following five applications are currently available:
 
 ## Installation
 
-Move the whole package to a location of your preference, for example
-`~/.local/lib/av-shortcuts`.
+In the root directory of this distribution you will find the following
+files and directories:
 
-Then, make sure that the main application files are executable, or make
-them executable with `chmod +x FILENAME`
+* `bin/` -- the directory with the main executables
+* `src/` -- the directory with the library files
+* `setup.cfg` -- setup file for the installation
+* `setup.py` -- setup script for the installation
 
-The main application files are:
+To install, do the following:
 
-* `~/.local/lib/av-shortcuts/src/av-to-aac`
-* `~/.local/lib/av-shortcuts/src/av-to-mp3`
-* `~/.local/lib/av-shortcuts/src/av-to-mp4`
-* `~/.local/lib/av-shortcuts/src/av-cut`  
-* `~/.local/lib/av-shortcuts/src/av-play`
+1. Change into the root directory.
 
-Finally:
+2. Run the following command (no need to be root): `python -m pip install .`
 
-1. Either add `~/.local/lib/av-shortcuts/src` to your `PATH` variable,
-   e.g. in Bash: `export PATH="$PATH:$HOME/.local/lib/av-shortcuts/src"`
-   
-2. Or create soft links to the main application files at a location
-   that you know is in your `PATH`, e.g. with Bash: `cd ~/.local/bin ;
-   ln -s ~/.local/lib/av-shortcuts/src/av-to-mp4.py av-to-mp4`
-   
-3. Or create shell aliases that invoke the main application files, e.g.
-   in Bash: `alias av-to-mp4=~/.local/lib/av-shortcuts/src/av-to-mp4.py`
-   or `alias av-to-mp4="python ~/.local/lib/av-shortcuts/src/av-to-mp4.py"` 
+3. Copy or move the main executables to a location that you know is in your
+   `PATH`, e.g. `~/.local/bin`.  Or create a symbolic link:
+   ```shell
+   cd ~/.local/bin ; ln -s /path/to/distribution/bin/av-to-mp4.py av-to-mp4
+   ```
