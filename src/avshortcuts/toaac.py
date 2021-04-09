@@ -19,10 +19,10 @@
 #
 ################################################################### aczutro ###
 
-import avshortcutslib
+import libavshortcuts
 
 if __name__ == '__main__':
-    avshortcutslib.mainToAAC()
+    libavshortcuts.mainToAAC()
 #if
 
 ### aczutro ###################################################################

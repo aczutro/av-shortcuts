@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/bin/env python3
 #
 # av-shortcuts - FFmpeg wrapper with a simplified command line
 #
@@ -19,10 +19,10 @@
 #
 ################################################################### aczutro ###
 
-import avshortcutslib
+import libavshortcuts
 
 if __name__ == '__main__':
-    avshortcutslib.mainPlay()
+    libavshortcuts.mainToMp4()
 #if
 
 ### aczutro ###################################################################
