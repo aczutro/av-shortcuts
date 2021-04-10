@@ -2,7 +2,9 @@
 
 FFmpeg wrapper with a simplified command line.
 
-Copyright 2020 - 2021 Alexander Czutro, github@czutro.ch
+Copyright (C) 2020 - present  Alexander Czutro <github@czutro.ch>
+
+Licence: GNU GPL v3
 
 ## Description
 
