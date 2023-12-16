@@ -19,7 +19,7 @@
 
 """ffmpeg command line builder"""
 
-from . import settings
+from . import config
 
 
 class FFmpegConvertor:

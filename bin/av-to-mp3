@@ -19,10 +19,10 @@
 #
 ################################################################### aczutro ###
 
-import avshortcuts
+import czavsuite
 
 if __name__ == '__main__':
-    avshortcuts.mainCut()
+    czavsuite.mainToMp3()
 #if
 
 ### aczutro ###################################################################

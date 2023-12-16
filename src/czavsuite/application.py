@@ -1,6 +1,6 @@
-# av-shortcuts - FFmpeg wrapper with a simplified command line
+# czavsuite - a suite of useful scripts to serialise FFmpeg jobs
 #
-# Copyright 2020 - 2021 Alexander Czutro, github@czutro.ch
+# Copyright 2020 - present Alexander Czutro, github@czutro.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,14 @@
 
 """main application classes"""
 
-from . import czlogging
+from czutils.utils import czlogging, czsystem
 from . import clp
+from . import config
+
+
+_logger = czlogging.LoggingChannel(czsystem.appName(),
+                                   czlogging.LoggingLevel.INFO,
+                                   colour=True)
 
 
 class Application:
@@ -29,15 +35,15 @@ class Application:
     provides interface for command line parsing and task execution
     """
 
-    def __init__(self, appDescription: str, optionsIDs: list):
+    def __init__(self, appDescription: str, configTypes: list):
         """constructor
 
         :param appDescription:  app description for help text
-        :param optionsIDs:      options to include in command line
+        :param configTypes:     options to include in command line
         """
-        self.L = czlogging.Logger("INFO")
         self.appDescription = appDescription
-        self.optionIDs = optionsIDs
+        self.configTypes = configTypes
+
     #__init__
 
 
@@ -47,28 +53,22 @@ class Application:
         try:
             self._parseCommandLine()
             self._execute()
-        except Exception as e:
-            self.L.error(e)
+        except clp.CommandLineError as e:
+            _logger.error(e)
         #except
+
     #execute
 
 
     def _parseCommandLine(self):
-        CLP = clp.CommandLineParser(self.appDescription, self.optionIDs,
-                                    fInfo=self.L.info)
+        CLP = clp.CommandLineParser(self.appDescription, self.configTypes)
         CLP.parseCommandLine()
 
         self.inputFiles = CLP.args
-        self.settings = CLP.settings
+        self.config = CLP.config
 
-        self.L.info(self.inputFiles)
-        self.L.info(self.settings.general)
-        self.L.info(self.settings.audioCodec)
-        self.L.info(self.settings.audioQuality)
-        self.L.info(self.settings.video)
-        self.L.info(self.settings.crop)
-        self.L.info(self.settings.scale)
-        self.L.info(self.settings.time)
+        _logger.info("files:", self.inputFiles)
+        _logger.info("config:", [ str(c) for c in self.config ])
     #_parseCommandLine
 
 
@@ -79,6 +79,24 @@ class Application:
 #Application
 
 
+class ApplicationProbe(Application):
+    """main application class for av-probe
+    """
+    def __init__(self):
+        """constructor
+        """
+        appDescription = "ffprobe wrapper"
+        configTypes = [ config.ConfigType.PROBING ]
+        super().__init__(appDescription, configTypes)
+    #__init__
+
+    # def _execute(self):
+    #     print("hello world")
+    # #_execute
+
+#ApplicationCut
+
+
 class ApplicationCut(Application):
     """main application class for av-to-mp4
     """
@@ -86,8 +104,8 @@ class ApplicationCut(Application):
         """constructor
         """
         appDescription = "cuts out video between two timestamps (no transcoding)"
-        optionIDs = [ clp.OptionID.GENERAL, clp.OptionID.TRANS_T ]
-        super().__init__(appDescription, optionIDs)
+        configTypes = [ config.ConfigType.GENERAL, config.ConfigType.CUTTING ]
+        super().__init__(appDescription, configTypes)
     #__init__
 
 #ApplicationCut
@@ -101,11 +119,11 @@ class ApplicationPlay(Application):
         """
         appDescription = "plays video and offers a simplified way of specifying "\
                          "cropping and scaling parameters"
-        optionIDs = [ clp.OptionID.GENERAL,
-                      clp.OptionID.TRANS_C,
-                      clp.OptionID.TRANS_S,
-                      clp.OptionID.TRANS_T ]
-        super().__init__(appDescription, optionIDs)
+        configTypes = [ config.ConfigType.GENERAL,
+                        config.ConfigType.CROPPING,
+                        config.ConfigType.SCALING,
+                        config.ConfigType.CUTTING ]
+        super().__init__(appDescription, configTypes)
     #__init__
 
 #ApplicationPlay
@@ -118,8 +136,8 @@ class ApplicationToAAC(Application):
         """constructor
         """
         appDescription = "extracts AAC audio from video files"
-        optionIDs = [ clp.OptionID.GENERAL ]
-        super().__init__(appDescription, optionIDs)
+        configTypes = [ config.ConfigType.GENERAL ]
+        super().__init__(appDescription, configTypes)
     #__init__
 
 #ApplicationToAAC
@@ -133,8 +151,8 @@ class ApplicationToMp3(Application):
         """
         appDescription = "extracts audio track from audio or video file "\
                          "and converts it to mp3"
-        optionIDs = [ clp.OptionID.GENERAL, clp.OptionID.AUDIO_QUALITY ]
-        super().__init__(appDescription, optionIDs)
+        configTypes = [ config.ConfigType.GENERAL, config.ConfigType.AUDIO ]
+        super().__init__(appDescription, configTypes)
     #__init__
 
 #ApplicationToMp3
@@ -146,10 +164,10 @@ class ApplicationToMp4(Application):
     def __init__(self):
         """constructor
         """
-        appDescription = "converts video to mp4 (h.265) using "\
+        appDescription = "converts video to mp4 (h.265 + aac) using "\
                          "a set of sensible defaults"
-        optionIDs = clp.OptionID.all()
-        super().__init__(appDescription, optionIDs)
+        configTypes = []
+        super().__init__(appDescription, configTypes)
     #__init__
 
 #ApplicationToMp4

@@ -1,6 +1,6 @@
-# av-shortcuts - FFmpeg wrapper with a simplified command line
+# czavsuite - a suite of useful scripts to serialise FFmpeg jobs
 #
-# Copyright 2020 - 2021 Alexander Czutro, github@czutro.ch
+# Copyright 2020 - present Alexander Czutro, github@czutro.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,83 +19,80 @@
 
 """data structures to hold settings"""
 
-from .czutils import autoStr
+from czutils.utils import czcode
 
 
-@autoStr
-class GeneralSettings:
+class ConfigType:
+    """enum class for config types
+    """
+    GENERAL, AUDIO, VIDEO, CROPPING, SCALING, CUTTING, PROBING = range(7)
+
+# ConfigType
+
+
+@czcode.autoStr
+class General:
     def __init__(self):
         self.dry = False
     #__init
-#GeneralSettings
+#General
 
 
-@autoStr
-class AudioCodecSettings:
+@czcode.autoStr
+class Audio:
     def __init__(self):
         self.noaudio = False
         self.codec = None
-    #__init
-#AudioCodecSettings
-
-
-@autoStr
-class AudioQualitySettings:
-    def __init__(self):
         self.bitrate = None
         self.quality = None
     #__init
-#AudioQualitySettings
+#Audio
 
 
-@autoStr
-class VideoSettings:
+@czcode.autoStr
+class Video:
     def __init__(self):
         self.crf = None
     #__init
-#VideoSettings
+#Video
 
 
-@autoStr
-class CropSettings:
+@czcode.autoStr
+class Cropping:
     def __init__(self):
         self.left = None
         self.right = None
         self.up = None
         self.down = None
     #__init
-#CropSettings
+#Cropping
 
 
-@autoStr
-class ScaleSettings:
+@czcode.autoStr
+class Scaling:
     def __init__(self):
         self.factor = None
     #__init
-#ScaleSettings
+#Scaling
 
 
-@autoStr
-class TimeSettings:
+@czcode.autoStr
+class Cutting:
     def __init__(self):
         self.start = None
         self.end = None
     #__init
-#TimeSettings
+#Cutting
 
 
-@autoStr
-class Settings:
+@czcode.autoStr
+class Probing:
+    FULL, VIDEO, AUDIO, DURATION = range(4)
+
     def __init__(self):
-        self.general = GeneralSettings()
-        self.audioCodec = AudioCodecSettings()
-        self.audioQuality = AudioQualitySettings()
-        self.video = VideoSettings()
-        self.crop = CropSettings()
-        self.scale = ScaleSettings()
-        self.time = TimeSettings()
-    #__init__
-#Settings
+        self.mode = Probing.FULL
+    #__init
+#Cutting
 
 
 ### aczutro ###################################################################

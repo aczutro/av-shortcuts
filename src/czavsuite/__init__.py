@@ -1,6 +1,6 @@
-# av-shortcuts - FFmpeg wrapper with a simplified command line
+# czavsuite - a suite of useful scripts to serialise FFmpeg jobs
 #
-# Copyright 2020 - present Alexander Czutro, github@czutro.ch
+# Copyright 2023 - present Alexander Czutro, github@czutro.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@
 #
 ################################################################### aczutro ###
 
-"""FFmpeg wrapper with a simplified command line
+"""A suite of useful scripts to serialise FFmpeg jobs
 """
-__author__ = "Alexander Czutro <github@czutro.ch>\nhttp://alexander.czutro.ch"
+__author__ = "Alexander Czutro <github@czutro.ch>"
 
 
 from . import application
@@ -33,6 +33,13 @@ def _main(appClass):
     app = appClass()
     app.execute()
 #_main
+
+
+def mainProbe():
+    """main routine for av-probe
+    """
+    _main(application.ApplicationProbe)
+#mainCut
 
 
 def mainCut():

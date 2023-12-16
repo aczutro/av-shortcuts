@@ -1,6 +1,6 @@
-# av-shortcuts - FFmpeg wrapper with a simplified command line
+# czavsuite - a suite of useful scripts to serialise FFmpeg jobs
 #
-# Copyright 2020 - 2021 Alexander Czutro, github@czutro.ch
+# Copyright 2020 - present Alexander Czutro, github@czutro.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,51 +19,43 @@
 
 """command line parser"""
 
-from . import settings
+from . import config
+from czutils.utils import czlogging
 
 import argparse
 
 
-class OptionID:
-    """enum class for option groups
+_logger = czlogging.LoggingChannel("czavsuite.clp",
+                                   czlogging.LoggingLevel.WARNING,
+                                   colour=True)
+
+
+class CommandLineError(Exception):
+    """thrown to report user errors
     """
-    GENERAL, \
-    AUDIO_CODEC, \
-    AUDIO_QUALITY, \
-    VIDEO, \
-    TRANS_C, \
-    TRANS_S, \
-    TRANS_T \
-        = range(7)
+    def __init__(self, *args):
+        super().__init__(" ".join(args))
+    # __init__
 
-    @staticmethod
-    def all():
-        """returns list that contains all elements of the enum
-        """
-        return range(7)
-    # all
-
-
-# OptionID
+# CommandLineError
 
 
 class CommandLineParser:
-    """command line parser"""
+    """common command line parser"""
 
-    def __init__(self, appDescription: str, optionIDs: list, fInfo=None):
+    def __init__(self, appDescription: str, configTypes: list):
         """constructor
 
         :param appDescription:  app description for help text
-        :param fInfo:           pointer to function for logging
-        :param optionIDs:       list of OptionIDs to include
+        :param configTypes:     list of OptionIDs to include
         """
         self.appDescription = appDescription
-        self.fInfo = fInfo
-        self.optionIDs = optionIDs
+        self.configTypes = configTypes
         self.args = []
-        self.settings = settings.Settings()
+        self.config = []
 
     # __init__
+
 
     def parseCommandLine(self):
         """parses command line and stores the settings internally
@@ -82,13 +74,13 @@ class CommandLineParser:
                             nargs="+",
                             help="input files to process"
                             )
-        if OptionID.GENERAL in self.optionIDs:
+        if config.ConfigType.GENERAL in self.configTypes:
             generalGroup.add_argument("-dry",
                                       action="store_true",
                                       help="only print FFmpeg command line; don't execute it"
                                       )
         # if
-        if OptionID.AUDIO_CODEC in self.optionIDs:
+        if config.ConfigType.AUDIO in self.configTypes:
             audioGroup.add_argument("-aac",
                                     action="store_true",
                                     help="transcode audio to AAC (default)"
@@ -105,8 +97,6 @@ class CommandLineParser:
                                     action="store_true",
                                     help="copy audio track from input file"
                                     )
-        # if
-        if OptionID.AUDIO_QUALITY in self.optionIDs:
             audioGroup.add_argument("-ab",
                                     dest="AUDIO_BITRATE",
                                     type=str,
@@ -121,7 +111,7 @@ class CommandLineParser:
                                          "Default: 0"
                                     )
         # if
-        if OptionID.VIDEO in self.optionIDs:
+        if config.ConfigType.VIDEO in self.configTypes:
             videoGroup.add_argument("-crf",
                                     dest="CONSTANT_RATE_FACTOR",
                                     type=int,
@@ -130,7 +120,7 @@ class CommandLineParser:
                                          "Default: FFmpeg's default (23 for h.264, 28 for h.265)."
                                     )
         # if
-        if OptionID.TRANS_C in self.optionIDs:
+        if config.ConfigType.CROPPING in self.configTypes:
             transGroup.add_argument("-c",
                                     dest="CROP_FORMAT",
                                     type=str,
@@ -140,14 +130,14 @@ class CommandLineParser:
                                          "and CROP_DOWN = CROP_UP."
                                     )
         # if
-        if OptionID.TRANS_S in self.optionIDs:
+        if config.ConfigType.SCALING in self.configTypes:
             transGroup.add_argument("-s",
                                     dest="SCALE_FACTOR",
                                     type=float,
                                     help="apply scale video filter."
                                     )
         # if
-        if OptionID.TRANS_T in self.optionIDs:
+        if config.ConfigType.CUTTING in self.configTypes:
             transGroup.add_argument("-t",
                                     dest="TIMESTAMPS",
                                     type=str,
@@ -160,141 +150,138 @@ class CommandLineParser:
 
         container = parser.parse_args()
 
-        if self.fInfo is not None:
-            self.fInfo(container)
-        # if
-
         self.args = container.INPUT_FILE
 
-        if OptionID.GENERAL in self.optionIDs:
-            self._deriveGeneralSettings(container)
-        else:
-            self.settings.general = None
-        # else
-        if OptionID.AUDIO_CODEC in self.optionIDs:
-            self._deriveAudioCodecSettings(container)
-        else:
-            self.settings.audioCodec = None
-        # else
-        if OptionID.AUDIO_QUALITY in self.optionIDs:
-            self._deriveAudioQualitySettings(container)
-        else:
-            self.settings.audioQuality = None
-        # else
-        if OptionID.VIDEO in self.optionIDs:
-            self._deriveVideoSettings(container)
-        else:
-            self.settings.video = None
-        # else
-        if OptionID.TRANS_C in self.optionIDs:
-            self._deriveCropSettings(container)
-        else:
-            self.settings.crop = None
-        # else
-        if OptionID.TRANS_S in self.optionIDs:
-            self._deriveScaleSettings(container)
-        else:
-            self.settings.scale = None
-        # else
-        if OptionID.TRANS_T in self.optionIDs:
-            self._deriveTimeSettings(container)
-        else:
-            self.settings.time = None
-        # else
+        for t in self.configTypes:
+            if t == config.ConfigType.GENERAL:
+                self._getGeneralSettings(container)
+            elif t == config.ConfigType.AUDIO:
+                self._getAudioSettings(container)
+            elif t == config.ConfigType.VIDEO:
+                self._getVideoSettings(container)
+            elif t == config.ConfigType.CROPPING:
+                self._getCroppingSettings(container)
+            elif t == config.ConfigType.SCALING:
+                self._getScalingSettings(container)
+            elif t == config.ConfigType.CUTTING:
+                self._getCuttingSettings(container)
+            elif t == config.ConfigType.PROBING:
+                self._getProbingSettings(container)
+            else:
+                _logger.error("invalid config type", t)
+            #else
+        #for
 
     # parseCommandLine
 
-    def _deriveGeneralSettings(self, container):
-        self.settings.general.dry = container.dry
 
-    # _deriveGeneralSettings
+    def _getGeneralSettings(self, container):
+        conf = config.General()
+        conf.dry = container.dry
+        self.config.append(conf)
 
-    def _deriveAudioCodecSettings(self, container):
+    # _getGeneralSettings
+
+
+    def _getAudioSettings(self, container):
+        conf = config.Audio()
+
         counter = 0
         if container.mp3:
             counter += 1
-            self.settings.audioCodec.codec = 'libmp3lame'
+            conf.codec = 'libmp3lame'
         # if
         if container.aac:
             counter += 1
-            self.settings.audioCodec.codec = 'aac'
+            conf.codec = 'aac'
         # if
         if container.copya:
             counter += 1
-            self.settings.audioCodec.codec = 'copy'
+            conf.codec = 'copy'
         # if
         if container.noa:
             counter += 1
-            self.settings.audioCodec.noaudio = True
+            conf.noaudio = True
         # if
         if counter > 1:
-            raise Exception("only one of -aac, -mp3, -noa and -copya allowed")
+            raise CommandLineError("only one of -aac, -mp3, -noa and -copya allowed")
         # if
 
-    # _deriveAudioCodecSettings
-
-    def _deriveAudioQualitySettings(self, container):
         counter = 0
         if container.AUDIO_BITRATE is not None:
             counter += 1
-            self.settings.audioQuality.bitrate = str(container.AUDIO_BITRATE)
+            conf.bitrate = str(container.AUDIO_BITRATE)
         # if
         if container.AUDIO_QUALITY is not None:
             if container.AUDIO_QUALITY < 0 or container.AUDIO_QUALITY > 9:
-                raise Exception("AUDIO_QUALITY must be between 0 and 9")
+                raise CommandLineError("AUDIO_QUALITY must be between 0 and 9")
             # if
             counter += 1
-            self.settings.audioQuality.quality = container.AUDIO_QUALITY
+            conf.quality = container.AUDIO_QUALITY
         # if
         if counter > 1:
-            raise Exception("only one of -ab and -aq allowed")
+            raise CommandLineError("only one of -ab and -aq allowed")
         # if
 
-    # __deriveAudioQualitySettings
+        self.config.append(conf)
 
-    def _deriveVideoSettings(self, container):
+    # _getAudioSettings
+
+
+    def _getVideoSettings(self, container):
+        conf = config.Video()
         if container.CONSTANT_RATE_FACTOR is not None:
             if container.CONSTANT_RATE_FACTOR < 0 or container.CONSTANT_RATE_FACTOR > 51:
-                raise Exception("CONSTANT_RATE_FACTOR must be between 0 and 51")
+                raise CommandLineError("CONSTANT_RATE_FACTOR must be between 0 and 51")
             # if
-            self.settings.video.crf = str(container.CONSTANT_RATE_FACTOR)
+            conf.crf = str(container.CONSTANT_RATE_FACTOR)
         # if
+        self.config.append(conf)
 
-    # _deriveVideoSettings
+    # _getVideoSettings
 
-    def _deriveCropSettings(self, container):
+
+    def _getCroppingSettings(self, container):
+        conf = config.Cropping()
         if container.CROP_FORMAT is not None:
             tokens = container.CROP_FORMAT.split(":")
             try:
                 if len(tokens) == 2:
-                    self.settings.crop.left = int(tokens[0])
-                    self.settings.crop.right = int(tokens[0])
-                    self.settings.crop.up = int(tokens[1])
-                    self.settings.crop.down = int(tokens[1])
+                    conf.left = int(tokens[0])
+                    conf.right = int(tokens[0])
+                    conf.up = int(tokens[1])
+                    conf.down = int(tokens[1])
                 elif len(tokens) == 4:
-                    self.settings.crop = (int(t) for t in tokens)
+                    conf.crop = (int(t) for t in tokens)
                 else:
-                    raise Exception("bad number of tokens: CROP_FORMAT")
+                    raise CommandLineError("bad number of tokens: CROP_FORMAT")
                 #else
             except ValueError as v:
                 raise Exception(v)
             #except
-            if min(( t >= 0 for t in self.settings.crop)) == False:
-                raise Exception("bad CROP_FORMAT: negative value")
+            if not min(( t >= 0 for t in conf.crop)):
+                raise CommandLineError("bad CROP_FORMAT: negative value")
             #if
         # if
-    # _deriveCropSettings
+        self.config.append(conf)
 
-    def _deriveScaleSettings(self, container):
-        pass
-        # raise Exception("IMPLEMENT ME!")
+    # _getCroppingSettings
 
-    # _deriveScaleSettings
 
-    def _deriveTimeSettings(self, container):
-        pass
-        # raise Exception("IMPLEMENT ME!")
-    # _deriveTimeSettings
+    def _getScalingSettings(self, container):
+        raise Exception("IMPLEMENT ME!")
+
+    # _getScalingSettings
+
+
+    def _getCuttingSettings(self, container):
+        raise Exception("IMPLEMENT ME!")
+    # _getCuttingSettings
+
+
+    def _getProbingSettings(self, container):
+        raise Exception("IMPLEMENT ME!")
+    # _getProbingSettings
 
 # CommandLineParser
 

@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
+#
 # av-shortcuts - FFmpeg wrapper with a simplified command line
 #
-# Copyright 2020 - 2021 Alexander Czutro, github@czutro.ch
+# Copyright 2020 - present Alexander Czutro, github@czutro.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,24 +19,10 @@
 #
 ################################################################### aczutro ###
 
-"""nifty utilities"""
+import czavsuite
 
-
-def autoStr(cls):
-    """auto-generates __str__ method for class cls
-
-    Use like this:
-
-    @autoStr
-    class MyClass:
-        ...
-    """
-    cls.__str__ = lambda self : \
-        "%s { %s }" \
-        % (type(self).__name__,
-           ", ".join("%s = %s" % dictEntry for dictEntry in vars(self).items()))
-    return cls
-#autoStr
-
+if __name__ == '__main__':
+    czavsuite.mainPlay()
+#if
 
 ### aczutro ###################################################################
