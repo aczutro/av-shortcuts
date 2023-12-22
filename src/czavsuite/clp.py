@@ -19,25 +19,18 @@
 
 """command line parser"""
 
-from . import config
+from . import config, __version__
 from czutils.utils import czlogging
-
 import argparse
 
 
 _logger = czlogging.LoggingChannel("czavsuite.clp",
-                                   czlogging.LoggingLevel.WARNING,
+                                   czlogging.LoggingLevel.ERROR,
                                    colour=True)
 
 
 class CommandLineError(Exception):
-    """thrown to report user errors
-    """
-    def __init__(self, *args):
-        super().__init__(" ".join(args))
-    # __init__
-
-# CommandLineError
+    pass
 
 
 class CommandLineParser:
@@ -62,18 +55,25 @@ class CommandLineParser:
 
         """
         parser = argparse.ArgumentParser(description=self.appDescription,
-                                         add_help=True)
+                                         add_help=False)
 
         generalGroup = parser.add_argument_group(" general")
         audioGroup = parser.add_argument_group(" audio")
         videoGroup = parser.add_argument_group(" video")
         transGroup = parser.add_argument_group(" transforms")
 
-        parser.add_argument("INPUT_FILE",
+        parser.add_argument("FILE",
                             type=str,
                             nargs="+",
-                            help="input files to process"
+                            help="audio or video file"
                             )
+        parser.add_argument("--help",
+                            action="help",
+                            help="show this help message and exit")
+        parser.add_argument("--version",
+                            action="version",
+                            version=__version__,
+                            help="show version number and exit")
         if config.ConfigType.GENERAL in self.configTypes:
             generalGroup.add_argument("-dry",
                                       action="store_true",
@@ -147,10 +147,44 @@ class CommandLineParser:
                                          "If END_TIME is empty, END_TIME = end of stream."
                                     )
         # if
+        if config.ConfigType.PROBING in self.configTypes:
+            parser.add_argument("-v",
+                                dest="probingMode",
+                                action="store_const",
+                                const=config.Probing.VIDEO,
+                                default=config.Probing.FULL,
+                                help="print only video information"
+                                )
+            parser.add_argument("-a",
+                                dest="probingMode",
+                                action="store_const",
+                                const=config.Probing.AUDIO,
+                                default=config.Probing.FULL,
+                                help="print only audio information"
+                                )
+            parser.add_argument("-d",
+                                dest="probingMode",
+                                action="store_const",
+                                const=config.Probing.DURATION,
+                                default=config.Probing.FULL,
+                                help="print only duration"
+                                )
+            parser.add_argument("-h",
+                                dest="headers",
+                                action="store_const",
+                                const=True,
+                                default=False,
+                                help="print table headers"
+                                )
+        # if
 
-        container = parser.parse_args()
+        try:
+            container = parser.parse_args()
+        except Exception as e:
+            raise CommandLineError(e)
+        #except
 
-        self.args = container.INPUT_FILE
+        self.args = container.FILE
 
         for t in self.configTypes:
             if t == config.ConfigType.GENERAL:
@@ -280,7 +314,10 @@ class CommandLineParser:
 
 
     def _getProbingSettings(self, container):
-        raise Exception("IMPLEMENT ME!")
+        conf = config.Probing()
+        conf.headers = container.headers
+        conf.mode = container.probingMode
+        self.config.append(conf)
     # _getProbingSettings
 
 # CommandLineParser

@@ -90,6 +90,7 @@ class Probing:
     FULL, VIDEO, AUDIO, DURATION = range(4)
 
     def __init__(self):
+        self.headers = False
         self.mode = Probing.FULL
     #__init
 #Cutting

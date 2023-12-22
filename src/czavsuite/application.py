@@ -19,14 +19,19 @@
 
 """main application classes"""
 
+from . import clp, config, probing, ffmpeg
 from czutils.utils import czlogging, czsystem
-from . import clp
-from . import config
+import sys
 
 
 _logger = czlogging.LoggingChannel(czsystem.appName(),
-                                   czlogging.LoggingLevel.INFO,
+                                   czlogging.LoggingLevel.ERROR,
                                    colour=True)
+
+
+def _stderr(err: str):
+    print("%s:" % czsystem.appName(), "error:", err)
+#_stderr
 
 
 class Application:
@@ -43,26 +48,30 @@ class Application:
         """
         self.appDescription = appDescription
         self.configTypes = configTypes
-
     #__init__
 
 
     def execute(self):
         """executes all tasks
         """
+        self._parseCommandLine()
         try:
-            self._parseCommandLine()
             self._execute()
-        except clp.CommandLineError as e:
-            _logger.error(e)
+        except ffmpeg.SubprocessError as e:
+            _stderr(e)
         #except
-
     #execute
 
 
     def _parseCommandLine(self):
         CLP = clp.CommandLineParser(self.appDescription, self.configTypes)
-        CLP.parseCommandLine()
+        try:
+            CLP.parseCommandLine()
+        except clp.CommandLineError as e:
+            _logger.error(e)
+            _stderr(e)
+            sys.exit(2)
+        #except
 
         self.inputFiles = CLP.args
         self.config = CLP.config
@@ -90,9 +99,16 @@ class ApplicationProbe(Application):
         super().__init__(appDescription, configTypes)
     #__init__
 
-    # def _execute(self):
-    #     print("hello world")
-    # #_execute
+    def _execute(self):
+        for conf in self.config:
+            if type(conf) is config.Probing:
+                probing.avProbe(self.inputFiles, conf)
+                break
+            #if
+        else:
+            raise Exception("invalid configuration")
+        #else
+    #_execute
 
 #ApplicationCut
 
