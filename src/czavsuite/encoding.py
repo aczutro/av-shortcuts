@@ -1,8 +1,6 @@
-#!/usr/bin/env python3
-#
 # czavsuite - a suite of useful scripts to serialise FFmpeg jobs
 #
-# Copyright 2020 - present Alexander Czutro, github@czutro.ch
+# Copyright 2023 - present Alexander Czutro, github@czutro.ch
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,10 +17,17 @@
 #
 ################################################################### aczutro ###
 
-import czavsuite
+"""conversion functionality"""
 
-if __name__ == '__main__':
-    czavsuite.mainProbe()
-#if
+from . import config, ffmpeg
 
-### aczutro ###################################################################
+
+def avToMp4(files: list,
+            confGeneral: config.General,
+            confVideo: config.Video,
+            confAudio: config.Audio,
+            confCropping: config.Cropping,
+            confCutting: config.Cutting,
+            confScaling: config.Scaling):
+    pass
+#avToMp4

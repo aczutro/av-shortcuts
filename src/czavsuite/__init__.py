@@ -26,56 +26,46 @@ __version__ = "2.0"
 from . import application
 
 
-def _main(appClass):
-    """generic main routine
-
-    :param appClass:  application class
-    """
-    app = appClass()
-    app.execute()
-#_main
-
-
 def mainProbe():
     """main routine for av-probe
     """
-    _main(application.ApplicationProbe)
+    application.ApplicationProbe()
 #mainCut
+
+
+def mainToMp4():
+    """main routine for av-to-mp4
+    """
+    application.ApplicationToMp4()
+#mainToMp4
 
 
 def mainCut():
     """main routine for av-cut
     """
-    _main(application.ApplicationCut)
+    application.ApplicationCut()
 #mainCut
 
 
 def mainPlay():
     """main routine for av-play
     """
-    _main(application.ApplicationPlay)
+    application.ApplicationPlay()
 #mainPlay
 
 
 def mainToAAC():
     """main routine for av-to-aac
     """
-    _main(application.ApplicationToAAC)
+    application.ApplicationToAAC()
 #mainToAAC
 
 
 def mainToMp3():
     """main routine for av-to-mp3
     """
-    _main(application.ApplicationToMp3)
+    application.ApplicationToMp3()
 #mainToMp3
-
-
-def mainToMp4():
-    """main routine for av-to-mp4
-    """
-    _main(application.ApplicationToMp4)
-#mainToMp4
 
 
 ### aczutro ###################################################################

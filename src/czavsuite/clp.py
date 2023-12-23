@@ -20,13 +20,17 @@
 """command line parser"""
 
 from . import config, __version__
-from czutils.utils import czlogging
+from czutils.utils import czlogging, czsystem
 import argparse
 
 
 _logger = czlogging.LoggingChannel("czavsuite.clp",
                                    czlogging.LoggingLevel.ERROR,
                                    colour=True)
+
+
+def _warning(*args):
+    print("%s: warning:" % czsystem.appName(), " ".join(args))
 
 
 class CommandLineError(Exception):
@@ -42,31 +46,23 @@ class CommandLineParser:
         :param appDescription:  app description for help text
         :param configTypes:     list of OptionIDs to include
         """
-        self.appDescription = appDescription
-        self.configTypes = configTypes
         self.args = []
-        self.config = []
+        self.config = {}
 
-    # __init__
-
-
-    def parseCommandLine(self):
-        """parses command line and stores the settings internally
-
-        """
-        parser = argparse.ArgumentParser(description=self.appDescription,
+        parser = argparse.ArgumentParser(description=appDescription,
                                          add_help=False)
 
-        generalGroup = parser.add_argument_group(" general")
-        audioGroup = parser.add_argument_group(" audio")
-        videoGroup = parser.add_argument_group(" video")
-        transGroup = parser.add_argument_group(" transforms")
+        generalGroup = parser.add_argument_group()
+        videoGroup = parser.add_argument_group()
+        audioGroup = parser.add_argument_group()
+        transGroup = parser.add_argument_group()
 
         parser.add_argument("FILE",
                             type=str,
                             nargs="+",
                             help="audio or video file"
                             )
+
         parser.add_argument("--help",
                             action="help",
                             help="show this help message and exit")
@@ -74,80 +70,103 @@ class CommandLineParser:
                             action="version",
                             version=__version__,
                             help="show version number and exit")
-        if config.ConfigType.GENERAL in self.configTypes:
+
+        if config.ConfigType.GENERAL in configTypes:
             generalGroup.add_argument("-dry",
                                       action="store_true",
                                       help="only print FFmpeg command line; don't execute it"
                                       )
         # if
-        if config.ConfigType.AUDIO in self.configTypes:
-            audioGroup.add_argument("-aac",
-                                    action="store_true",
-                                    help="transcode audio to AAC (default)"
+        if config.ConfigType.VIDEO in configTypes:
+            videoGroup.add_argument("-avc",
+                                    dest="vCodec",
+                                    action="store_const",
+                                    const="h264",
+                                    default="h265",
+                                    help="transcode video to AVC/H.264 (default: HEVC/H.265)"
                                     )
+            videoGroup.add_argument("-vcopy",
+                                    dest="vCodec",
+                                    action="store_const",
+                                    const="copy",
+                                    default="h265",
+                                    help="copy video track from input file"
+                                    )
+            videoGroup.add_argument("-vq",
+                                    metavar="CRF",
+                                    dest="crf",
+                                    type=int,
+                                    help="video quality: 0 is best, 51 is worst (default: 23)"
+                                    )
+        # if
+        if config.ConfigType.AUDIO in configTypes:
             audioGroup.add_argument("-mp3",
-                                    action="store_true",
-                                    help="transcode audio to MP3"
+                                    dest="aCodec",
+                                    action="store_const",
+                                    const="mp3",
+                                    default="aac",
+                                    help="transcode audio to MP3 (default: AAC)"
                                     )
-            audioGroup.add_argument("-noa",
-                                    action="store_true",
-                                    help="produce no audio track "
-                                    )
-            audioGroup.add_argument("-copya",
-                                    action="store_true",
+            audioGroup.add_argument("-acopy",
+                                    dest="aCodec",
+                                    action="store_const",
+                                    const="copy",
+                                    default="aac",
                                     help="copy audio track from input file"
                                     )
+        #if
+        if config.ConfigType.NOAUDIO in configTypes:
+            audioGroup.add_argument("-anull",
+                                    dest="aCodec",
+                                    action="store_const",
+                                    const="null",
+                                    default="aac",
+                                    help="no audio"
+                                    )
+        #if
+        if config.ConfigType.AUDIO in configTypes:
             audioGroup.add_argument("-ab",
-                                    dest="AUDIO_BITRATE",
+                                    metavar="BITRATE",
+                                    dest="aBitrate",
                                     type=str,
-                                    help="bitrate for output audio track, e.g. '320k'. "
-                                         "Default: use VBR."
+                                    help="aac or mp3 bitrate (aac default: '256k')"
                                     )
             audioGroup.add_argument("-aq",
-                                    dest="AUDIO_QUALITY",
+                                    metavar="QUALITY",
+                                    dest="aQuality",
                                     type=int,
-                                    help="encode mp3 audio using VBR with this quality. "
-                                         "0 is best, 9 is worst. "
-                                         "Default: 0"
+                                    help="mp3 only: 0 is best, 9 is worst (mp3 default: 0)"
                                     )
         # if
-        if config.ConfigType.VIDEO in self.configTypes:
-            videoGroup.add_argument("-crf",
-                                    dest="CONSTANT_RATE_FACTOR",
-                                    type=int,
-                                    help="quality parameter for output video track. "
-                                         "0 is best, 51 is worst. "
-                                         "Default: FFmpeg's default (23 for h.264, 28 for h.265)."
-                                    )
-        # if
-        if config.ConfigType.CROPPING in self.configTypes:
+        if config.ConfigType.CROPPING in configTypes:
             transGroup.add_argument("-c",
-                                    dest="CROP_FORMAT",
+                                    metavar="LEFT[:RIGHT]:UP[:DOWN]",
+                                    dest="croppingFormat",
                                     type=str,
-                                    help="CROP_LEFT[:CROP_RIGHT]:CROP_UP[:CROP_DOWN] "
-                                         "If CROP_RIGHT *and* CROP_DOWN are left out, "
-                                         "it is assumed that CROP_RIGHT = CROP_LEFT "
-                                         "and CROP_DOWN = CROP_UP."
+                                    help="number of pixels to crop away; "
+                                         "if only LEFT:UP are given, "
+                                         "RIGHT = LEFT and DOWN = UP"
                                     )
         # if
-        if config.ConfigType.SCALING in self.configTypes:
+        if config.ConfigType.SCALING in configTypes:
             transGroup.add_argument("-s",
-                                    dest="SCALE_FACTOR",
+                                    metavar="FACTOR",
+                                    dest="scalingFactor",
                                     type=float,
-                                    help="apply scale video filter."
+                                    help="scale video by this factor"
                                     )
         # if
-        if config.ConfigType.CUTTING in self.configTypes:
+        if config.ConfigType.CUTTING in configTypes:
             transGroup.add_argument("-t",
-                                    dest="TIMESTAMPS",
+                                    dest="timestampRange",
+                                    metavar="[START]:[END]",
                                     type=str,
-                                    help="[START_TIME]:[END_TIME]  "
-                                         "START_TIME and END_TIME are in seconds. "
-                                         "If START_TIME is empty, START_TIME = 0. "
-                                         "If END_TIME is empty, END_TIME = end of stream."
+                                    help="start and end times in seconds; "
+                                         "empty START means START = 0; "
+                                         "empty END means END = end of input stream"
                                     )
         # if
-        if config.ConfigType.PROBING in self.configTypes:
+        if config.ConfigType.PROBING in configTypes:
             parser.add_argument("-v",
                                 dest="probingMode",
                                 action="store_const",
@@ -186,13 +205,13 @@ class CommandLineParser:
 
         self.args = container.FILE
 
-        for t in self.configTypes:
+        for t in configTypes:
             if t == config.ConfigType.GENERAL:
                 self._getGeneralSettings(container)
-            elif t == config.ConfigType.AUDIO:
-                self._getAudioSettings(container)
             elif t == config.ConfigType.VIDEO:
                 self._getVideoSettings(container)
+            elif t == config.ConfigType.AUDIO or t == config.ConfigType.NOAUDIO:
+                self._getAudioSettings(container)
             elif t == config.ConfigType.CROPPING:
                 self._getCroppingSettings(container)
             elif t == config.ConfigType.SCALING:
@@ -205,80 +224,88 @@ class CommandLineParser:
                 _logger.error("invalid config type", t)
             #else
         #for
-
-    # parseCommandLine
+    #__init__
 
 
     def _getGeneralSettings(self, container):
         conf = config.General()
         conf.dry = container.dry
-        self.config.append(conf)
-
+        self.config[config.ConfigType.GENERAL] = conf
     # _getGeneralSettings
+
+
+    def _getVideoSettings(self, container):
+        conf = config.Video()
+
+        conf.codec = container.vCodec
+        conf.crf = "23"
+
+        if container.crf is not None:
+            if conf.codec == "copy":
+                _warning("copying input video without transcoding; ignoring -vq")
+            elif container.crf < 0 or container.crf > 51:
+                raise CommandLineError("CRF must be between 0 and 51")
+            # if
+            conf.crf = str(container.crf)
+        # if
+
+        self.config[config.ConfigType.VIDEO] = conf
+    # _getVideoSettings
 
 
     def _getAudioSettings(self, container):
         conf = config.Audio()
 
-        counter = 0
-        if container.mp3:
-            counter += 1
-            conf.codec = 'libmp3lame'
-        # if
-        if container.aac:
-            counter += 1
-            conf.codec = 'aac'
-        # if
-        if container.copya:
-            counter += 1
-            conf.codec = 'copy'
-        # if
-        if container.noa:
-            counter += 1
-            conf.noaudio = True
-        # if
-        if counter > 1:
-            raise CommandLineError("only one of -aac, -mp3, -noa and -copya allowed")
-        # if
+        conf.codec = container.aCodec
+        conf.bitrate = None
+        conf.quality = None
 
         counter = 0
-        if container.AUDIO_BITRATE is not None:
+        if container.aBitrate is not None:
             counter += 1
-            conf.bitrate = str(container.AUDIO_BITRATE)
+            conf.bitrate = container.aBitrate
         # if
-        if container.AUDIO_QUALITY is not None:
-            if container.AUDIO_QUALITY < 0 or container.AUDIO_QUALITY > 9:
-                raise CommandLineError("AUDIO_QUALITY must be between 0 and 9")
+        if container.aQuality is not None:
+            if conf.codec != "mp3":
+                raise CommandLineError("-aq can only be used with -mp3")
+            #if
+            if container.aQuality < 0 or container.aQuality > 9:
+                raise CommandLineError("QUALITY must be between 0 and 9")
             # if
             counter += 1
-            conf.quality = container.AUDIO_QUALITY
-        # if
-        if counter > 1:
-            raise CommandLineError("only one of -ab and -aq allowed")
+            conf.quality = str(container.aQuality)
         # if
 
-        self.config.append(conf)
+        if conf.codec is None and counter > 0:
+            _warning("no audio output; ignoring -ab and -aq")
+        elif counter > 1:
+            raise CommandLineError("-ab and -aq cannot be used together")
+        # if
 
+        if counter == 0:
+            if conf.codec == "aac":
+                conf.bitrate = "256k"
+            #if
+            if conf.codec == "mp3":
+                conf.quality = "0"
+            #if
+        #if
+
+        self.config[config.ConfigType.AUDIO] = conf
     # _getAudioSettings
-
-
-    def _getVideoSettings(self, container):
-        conf = config.Video()
-        if container.CONSTANT_RATE_FACTOR is not None:
-            if container.CONSTANT_RATE_FACTOR < 0 or container.CONSTANT_RATE_FACTOR > 51:
-                raise CommandLineError("CONSTANT_RATE_FACTOR must be between 0 and 51")
-            # if
-            conf.crf = str(container.CONSTANT_RATE_FACTOR)
-        # if
-        self.config.append(conf)
-
-    # _getVideoSettings
 
 
     def _getCroppingSettings(self, container):
         conf = config.Cropping()
-        if container.CROP_FORMAT is not None:
-            tokens = container.CROP_FORMAT.split(":")
+
+        conf.left = None
+        conf.right = None
+        conf.down = None
+        conf.up = None
+
+        if container.croppingFormat is not None:
+            tokens = container.croppingFormat.split(":")
+
             try:
                 if len(tokens) == 2:
                     conf.left = int(tokens[0])
@@ -286,30 +313,98 @@ class CommandLineParser:
                     conf.up = int(tokens[1])
                     conf.down = int(tokens[1])
                 elif len(tokens) == 4:
-                    conf.crop = (int(t) for t in tokens)
+                    conf.left = int(tokens[0])
+                    conf.right = int(tokens[1])
+                    conf.up = int(tokens[2])
+                    conf.down = int(tokens[3])
                 else:
-                    raise CommandLineError("bad number of tokens: CROP_FORMAT")
+                    raise CommandLineError("cropping format: bad number of tokens")
                 #else
-            except ValueError as v:
-                raise Exception(v)
+            except ValueError as e:
+                raise CommandLineError("-c: %s" % e)
             #except
-            if not min(( t >= 0 for t in conf.crop)):
-                raise CommandLineError("bad CROP_FORMAT: negative value")
+
+            if conf.left < 0 or conf.right < 0 or conf.up < 0 or conf.down < 0:
+                raise CommandLineError("cropping format: a negative number "
+                                       "of pixels doesn't make sense")
             #if
         # if
-        self.config.append(conf)
 
+        self.config[config.ConfigType.CROPPING] = conf
     # _getCroppingSettings
 
 
     def _getScalingSettings(self, container):
-        raise Exception("IMPLEMENT ME!")
+        conf = config.Scaling()
 
+        conf.factor = None
+
+        if container.scalingFactor is not None:
+            if container.scalingFactor == 0:
+                raise CommandLineError("what do you expect to get if you scale video by factor 0?")
+            elif container.scalingFactor < 0:
+                raise CommandLineError("cowardly refusing to scale video by a negative factor")
+            else:
+                conf.factor = container.scalingFactor
+            #else
+        #if
+
+        self.config[config.ConfigType.SCALING] = conf
     # _getScalingSettings
 
 
     def _getCuttingSettings(self, container):
-        raise Exception("IMPLEMENT ME!")
+        conf = config.Cutting()
+
+        conf.start = None
+        conf.end = None
+
+        negative = False
+        inconsistent = False
+
+        if container.timestampRange is not None:
+            tokens = container.timestampRange.split(":")
+            try:
+                if len(tokens) == 2:
+                    if len(tokens[0]) + len(tokens[1]) == 0:
+                        raise CommandLineError("cutting timestamps: both tokens cannot be empty "
+                                               "at the same time")
+                    elif len(tokens[0]) == 0:
+                        conf.end = float(tokens[1])
+                        if conf.end < 0:
+                            negative = True
+                        #if
+                    elif len(tokens[1]) == 0:
+                        conf.start = float(tokens[0])
+                        if conf.start < 0:
+                            negative = True
+                        #if
+                    else:
+                        conf.start = float(tokens[0])
+                        conf.end = float(tokens[1])
+                        if conf.start < 0 or conf.end < 0:
+                            negative = True
+                        #if
+                        if not conf.start < conf.end:
+                            inconsistent = True
+                        #if
+                    #else
+                else:
+                    raise CommandLineError("cutting timestamps: bad number of tokens")
+                #else
+            except ValueError as e:
+                raise CommandLineError("-t: %s" % e)
+            #except
+
+            if negative:
+                raise CommandLineError("cutting timestamps: start and end times cannot be negative")
+            #if
+            if inconsistent:
+                raise CommandLineError("cutting timestamps: start time must be less than end time")
+            #if
+        # if
+
+        self.config[config.ConfigType.CUTTING] = conf
     # _getCuttingSettings
 
 
@@ -317,7 +412,7 @@ class CommandLineParser:
         conf = config.Probing()
         conf.headers = container.headers
         conf.mode = container.probingMode
-        self.config.append(conf)
+        self.config[config.ConfigType.PROBING] = conf
     # _getProbingSettings
 
 # CommandLineParser

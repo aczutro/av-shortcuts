@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# av-shortcuts - FFmpeg wrapper with a simplified command line
+# czavsuite - a suite of useful scripts to serialise FFmpeg jobs
 #
 # Copyright 2020 - present Alexander Czutro, github@czutro.ch
 #

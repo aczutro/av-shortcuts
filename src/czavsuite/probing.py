@@ -62,8 +62,8 @@ class TableMaker:
             self._table.append([ "codec", "resolution", "aspect ratio", "fps", "file" ])
             self._table.append([ "-----", "----------", "------------", "---", "----" ])
         elif mode == config.Probing.AUDIO:
-            self._table.append([ "codec", "sample rate", "layout", "bit rate", "file" ])
-            self._table.append([ "-----", "-----------", "------", "--------", "----" ])
+            self._table.append([ "codec", "sample rate", "layout", "bitrate", "file" ])
+            self._table.append([ "-----", "-----------", "------", "-------", "----" ])
         elif mode == config.Probing.DURATION:
             self._table.append([ "duration", "file" ])
             self._table.append([ "--------", "----" ])

@@ -25,7 +25,7 @@ from czutils.utils import czcode
 class ConfigType:
     """enum class for config types
     """
-    GENERAL, AUDIO, VIDEO, CROPPING, SCALING, CUTTING, PROBING = range(7)
+    GENERAL, VIDEO, AUDIO, NOAUDIO, CROPPING, SCALING, CUTTING, PROBING = range(8)
 
 # ConfigType
 
@@ -39,31 +39,31 @@ class General:
 
 
 @czcode.autoStr
-class Audio:
-    def __init__(self):
-        self.noaudio = False
-        self.codec = None
-        self.bitrate = None
-        self.quality = None
-    #__init
-#Audio
-
-
-@czcode.autoStr
 class Video:
     def __init__(self):
-        self.crf = None
+        self.codec = ""
+        self.crf = ""
     #__init
 #Video
 
 
 @czcode.autoStr
+class Audio:
+    def __init__(self):
+        self.codec = ""
+        self.bitrate = ""
+        self.quality = ""
+    #__init
+#Audio
+
+
+@czcode.autoStr
 class Cropping:
     def __init__(self):
-        self.left = None
-        self.right = None
-        self.up = None
-        self.down = None
+        self.left = 0
+        self.right = 0
+        self.up = 0
+        self.down = 0
     #__init
 #Cropping
 
@@ -71,7 +71,7 @@ class Cropping:
 @czcode.autoStr
 class Scaling:
     def __init__(self):
-        self.factor = None
+        self.factor = .0
     #__init
 #Scaling
 
@@ -79,8 +79,8 @@ class Scaling:
 @czcode.autoStr
 class Cutting:
     def __init__(self):
-        self.start = None
-        self.end = None
+        self.start = .0
+        self.end = .0
     #__init
 #Cutting
 

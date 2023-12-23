@@ -19,7 +19,7 @@
 
 """main application classes"""
 
-from . import clp, config, probing, ffmpeg
+from . import clp, config, probing, encoding, ffmpeg
 from czutils.utils import czlogging, czsystem
 import sys
 
@@ -48,36 +48,30 @@ class Application:
         """
         self.appDescription = appDescription
         self.configTypes = configTypes
-    #__init__
 
-
-    def execute(self):
-        """executes all tasks
-        """
         self._parseCommandLine()
+
         try:
             self._execute()
         except ffmpeg.SubprocessError as e:
             _stderr(e)
         #except
-    #execute
+    #__init__
 
 
     def _parseCommandLine(self):
-        CLP = clp.CommandLineParser(self.appDescription, self.configTypes)
         try:
-            CLP.parseCommandLine()
+            CLP = clp.CommandLineParser(self.appDescription, self.configTypes)
+            self.inputFiles = CLP.args
+            self.config = CLP.config
         except clp.CommandLineError as e:
             _logger.error(e)
             _stderr(e)
             sys.exit(2)
         #except
 
-        self.inputFiles = CLP.args
-        self.config = CLP.config
-
         _logger.info("files:", self.inputFiles)
-        _logger.info("config:", [ str(c) for c in self.config ])
+        _logger.info("config:", "\n".join([ str(self.config[key]) for key in self.config ]))
     #_parseCommandLine
 
 
@@ -100,17 +94,51 @@ class ApplicationProbe(Application):
     #__init__
 
     def _execute(self):
-        for conf in self.config:
-            if type(conf) is config.Probing:
-                probing.avProbe(self.inputFiles, conf)
-                break
-            #if
-        else:
-            raise Exception("invalid configuration")
-        #else
+        try:
+            probing.avProbe(self.inputFiles, self.config[config.ConfigType.PROBING])
+        except KeyError as e:
+            _logger.error("invalid config")
+            raise e
+        #except
     #_execute
 
-#ApplicationCut
+#ApplicationProbe
+
+
+class ApplicationToMp4(Application):
+    """main application class for av-to-mp4
+    """
+    def __init__(self):
+        """constructor
+        """
+        appDescription = "Converts video files to mp4."
+        configTypes = [ config.ConfigType.GENERAL,
+                        config.ConfigType.VIDEO,
+                        config.ConfigType.AUDIO,
+                        config.ConfigType.NOAUDIO,
+                        config.ConfigType.CUTTING,
+                        config.ConfigType.CROPPING,
+                        config.ConfigType.SCALING ]
+        super().__init__(appDescription, configTypes)
+    #__init__
+
+    def _execute(self):
+        try:
+            encoding.avToMp4(self.inputFiles,
+                             self.config[config.ConfigType.GENERAL],
+                             self.config[config.ConfigType.VIDEO],
+                             self.config[config.ConfigType.AUDIO],
+                             self.config[config.ConfigType.CROPPING],
+                             self.config[config.ConfigType.CUTTING],
+                             self.config[config.ConfigType.SCALING]
+                             )
+        except KeyError as e:
+            _logger.error("invalid config")
+            raise e
+        #except
+    #_execute
+
+#ApplicationToMp4
 
 
 class ApplicationCut(Application):
@@ -172,21 +200,6 @@ class ApplicationToMp3(Application):
     #__init__
 
 #ApplicationToMp3
-
-
-class ApplicationToMp4(Application):
-    """main application class for av-to-mp4
-    """
-    def __init__(self):
-        """constructor
-        """
-        appDescription = "converts video to mp4 (h.265 + aac) using "\
-                         "a set of sensible defaults"
-        configTypes = []
-        super().__init__(appDescription, configTypes)
-    #__init__
-
-#ApplicationToMp4
 
 
 ### aczutro ###################################################################
