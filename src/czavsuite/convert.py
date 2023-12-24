@@ -19,141 +19,24 @@
 
 """FFmpeg wrapper"""
 
-from . import config
-from czutils.utils import czlogging, cztext
+from . import config, probing, utils
+from czutils.utils import czlogging
 import os.path
-import re
-import subprocess
 
 
-_logger = czlogging.LoggingChannel("czavsuite.ffmpeg",
+_logger = czlogging.LoggingChannel("czavsuite.convert",
                                    czlogging.LoggingLevel.ERROR,
                                    colour=True)
 
 
-class FfmpegError(Exception):
+class ConvertError(Exception):
     pass
-
-
-class SystemCaller:
-
-    def __init__(self, exceptionOnFailure: bool):
-        self._stdout = ""
-        self._stderr = ""
-        self._doRaise = exceptionOnFailure
-    #__init__
-
-
-    def stdout(self):
-        return self._stdout
-    #stdout
-
-
-    def stderr(self):
-        return self._stderr
-    #stdout
-
-
-    def call(self, args: list):
-        P = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = P.communicate()
-        self._stdout = stdout.decode(errors="ignore")
-        self._stderr = stderr.decode(errors="ignore")
-        if P.returncode and self._doRaise:
-            _logger.warning("'%s'" % " ".join(args), "returned", P.returncode)
-            raise FfmpegError(self._stderr)
-        #if
-        return P.returncode
-    #def
-
-#SystemCaller
-
-
-def _grep(pattern: str, text, ignoreCase=False, colour=False):
-    if type(text) is str:
-        return _grep(pattern, text.split(sep='\n'), ignoreCase, colour)
-    #if
-
-    flags = re.IGNORECASE if ignoreCase else 0
-    matcher = re.compile(pattern, flags)
-    ans = []
-    for line in text:
-        if colour:
-            match = matcher.search(line)
-            if match is not None:
-                start, end = match.start(), match.end()
-                ans.append("%s%s%s"
-                           % (line[:start],
-                              cztext.colourise(line[start:end], cztext.Col16.RED, bold=True),
-                              line[end:]))
-            #if
-        else:
-            if matcher.search(line) is not None:
-                ans.append(line)
-            #if
-        #else
-    #for
-    return ans
-#grep
-
-
-def _ffprobeDict(lines: list):
-    ans = dict()
-    for line in lines:
-        tokens = line.split(sep='=')
-        if len(tokens) == 2:
-            ans[tokens[0]] = tokens[1]
-        #if
-    #for
-    return ans
-#_getDict
-
-
-def ffprobe(file: str, mode: int):
-    """
-    TODO
-    """
-    S = SystemCaller(True)
-
-    if mode == config.Probing.FULL:
-        returnCode = S.call(['ffprobe', '-hide_banner', file])
-        _logger.info("return code:", returnCode)
-        _logger.info("stdout:", S.stdout())
-        _logger.info("stderr:", S.stderr())
-        return _grep("Video|Audio",
-                     _grep("Stream", S.stderr()),
-                     colour=True)
-    elif mode == config.Probing.VIDEO or mode == config.Probing.AUDIO:
-        returnCode = S.call(['ffprobe', '-hide_banner',
-                             '-show_streams', '-select_streams',
-                             'v' if mode == config.Probing.VIDEO else 'a',
-                             file])
-        _logger.info("return code:", returnCode)
-        _logger.info("stdout:", S.stdout())
-        _logger.info("stderr:", S.stderr())
-        return _ffprobeDict(S.stdout().split(sep='\n'))
-    elif mode == config.Probing.DURATION:
-        returnCode = S.call(['ffprobe', '-hide_banner', file])
-        _logger.info("return code:", returnCode)
-        _logger.info("stdout:", S.stdout())
-        _logger.info("stderr:", S.stderr())
-        return _grep("Duration", S.stderr())[0].split(sep=',')[0].split(sep=' ')[3]
-    else:
-        raise ValueError
-    #else
-#ffprobe
 
 
 def _outputFilename(inputFile: str, outputType: str):
     """
-    inputFile: string
-    lInputTypes: list of strings
-    outputType: string
-    Constructs (and returns) a file name by replacing the input file's
-    ending by outputType.  The input file's ending must be in lInputTypes.
     """
     tokens = inputFile.split('.')
-    outputFile = None
 
     if len(tokens) == 1:
         return '%s.%s' % (inputFile, outputType)
@@ -179,20 +62,20 @@ def _checkExistence(filename: str):
      if user answers no, raises an exception"""
     try:
         if os.path.exists(filename):
-            if input("file %s already exists -- overwrite? " % filename) in [ 'y', 'Y', 'yes', 'YES' ]:
+            if input("file %s already exists -- overwrite? " % filename) \
+                    in [ 'y', 'Y', 'yes', 'YES' ]:
                 os.remove(filename)
             else:
-                raise FfmpegError("file %s already exists -- aborting" % filename)
+                raise ConvertError("file %s already exists -- aborting" % filename)
             #if
         #if
     except PermissionError as e:
-        raise FfmpegError(e)
+        raise ConvertError(e)
     #except
 #def
 
 
 def _toFFmpegVideo(conf: config.Video) -> list:
-    codec = ""
     if conf.codec == "h265":
         codec = "libx265"
     elif conf.codec == "h264":
@@ -249,7 +132,7 @@ def _toFFmpegCropping(conf: config.Cropping) -> list:
 
 def _toFFmpegScaling(file: str, conf: config.Scaling) -> list:
     if conf.valid:
-        probe = ffprobe(file, config.Probing.VIDEO)
+        probe = probing.ffprobe(file, config.Probing.VIDEO)
         width = int(probe["width"])
         height = int(probe["height"])
         fWidth = width * conf.factor
@@ -276,14 +159,14 @@ def _toFFmpegCuttting(conf: config.Cutting) -> list:
 #_toFFmpegCuttting
 
 
-def avToMp4(files: list,
-            confGeneral: config.General,
-            confVideo: config.Video,
-            confAudio: config.Audio,
-            confCropping: config.Cropping,
-            confCutting: config.Cutting,
-            confScaling: config.Scaling):
-    S = SystemCaller(True)
+def avConvert(files: list,
+              confGeneral: config.General,
+              confVideo: config.Video,
+              confAudio: config.Audio,
+              confCropping: config.Cropping,
+              confCutting: config.Cutting,
+              confScaling: config.Scaling):
+    S = utils.SystemCaller(True)
     for file in files:
         outputFile = _outputFilename(file, "mp4")
         _checkExistence(outputFile)

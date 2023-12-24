@@ -19,7 +19,7 @@
 
 """main application classes"""
 
-from . import clp, config, probing, ffmpeg
+from . import clp, config, probing, convert
 from czutils.utils import czlogging, czsystem
 import sys
 
@@ -53,7 +53,7 @@ class Application:
 
         try:
             self._execute()
-        except ffmpeg.FfmpegError as e:
+        except convert.ConvertError as e:
             _stderr(e)
         #except
     #__init__
@@ -83,7 +83,7 @@ class Application:
 
 
 class ApplicationProbe(Application):
-    """main application class for av-probe
+    """entry point for av-probe
     """
     def __init__(self):
         """constructor
@@ -107,8 +107,8 @@ class ApplicationProbe(Application):
 #ApplicationProbe
 
 
-class ApplicationToMp4(Application):
-    """main application class for av-to-mp4
+class ApplicationConvert(Application):
+    """entry point for av-convert
     """
     def __init__(self):
         """constructor
@@ -126,13 +126,13 @@ class ApplicationToMp4(Application):
 
     def _execute(self):
         try:
-            ffmpeg.avToMp4(self.inputFiles,
-                           self.config[config.ConfigType.GENERAL],
-                           self.config[config.ConfigType.VIDEO],
-                           self.config[config.ConfigType.AUDIO],
-                           self.config[config.ConfigType.CROPPING],
-                           self.config[config.ConfigType.CUTTING],
-                           self.config[config.ConfigType.SCALING])
+            convert.avConvert(self.inputFiles,
+                              self.config[config.ConfigType.GENERAL],
+                              self.config[config.ConfigType.VIDEO],
+                              self.config[config.ConfigType.AUDIO],
+                              self.config[config.ConfigType.CROPPING],
+                              self.config[config.ConfigType.CUTTING],
+                              self.config[config.ConfigType.SCALING])
         except KeyError as e:
             _logger.error("invalid config")
             raise e
@@ -142,22 +142,8 @@ class ApplicationToMp4(Application):
 #ApplicationToMp4
 
 
-class ApplicationCut(Application):
-    """main application class for av-to-mp4
-    """
-    def __init__(self):
-        """constructor
-        """
-        appDescription = "cuts out video between two timestamps (no transcoding)"
-        configTypes = [ config.ConfigType.GENERAL, config.ConfigType.CUTTING ]
-        super().__init__(appDescription, configTypes)
-    #__init__
-
-#ApplicationCut
-
-
 class ApplicationPlay(Application):
-    """main application class for av-to-mp4
+    """entry point for av-play
     """
     def __init__(self):
         """constructor
@@ -172,35 +158,6 @@ class ApplicationPlay(Application):
     #__init__
 
 #ApplicationPlay
-
-
-class ApplicationToAAC(Application):
-    """main application class for av-to-mp4
-    """
-    def __init__(self):
-        """constructor
-        """
-        appDescription = "extracts AAC audio from video files"
-        configTypes = [ config.ConfigType.GENERAL ]
-        super().__init__(appDescription, configTypes)
-    #__init__
-
-#ApplicationToAAC
-
-
-class ApplicationToMp3(Application):
-    """main application class for av-to-mp4
-    """
-    def __init__(self):
-        """constructor
-        """
-        appDescription = "extracts audio track from audio or video file "\
-                         "and converts it to mp3"
-        configTypes = [ config.ConfigType.GENERAL, config.ConfigType.AUDIO ]
-        super().__init__(appDescription, configTypes)
-    #__init__
-
-#ApplicationToMp3
 
 
 ### aczutro ###################################################################

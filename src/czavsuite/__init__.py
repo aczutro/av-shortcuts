@@ -27,45 +27,24 @@ from . import application
 
 
 def mainProbe():
-    """main routine for av-probe
+    """entry point for av-probe
     """
     application.ApplicationProbe()
 #mainCut
 
 
-def mainToMp4():
-    """main routine for av-to-mp4
+def mainConvert():
+    """entry point for av-convert
     """
-    application.ApplicationToMp4()
+    application.ApplicationConvert()
 #mainToMp4
 
 
-def mainCut():
-    """main routine for av-cut
-    """
-    application.ApplicationCut()
-#mainCut
-
-
 def mainPlay():
-    """main routine for av-play
+    """entry point for av-play
     """
     application.ApplicationPlay()
 #mainPlay
-
-
-def mainToAAC():
-    """main routine for av-to-aac
-    """
-    application.ApplicationToAAC()
-#mainToAAC
-
-
-def mainToMp3():
-    """main routine for av-to-mp3
-    """
-    application.ApplicationToMp3()
-#mainToMp3
 
 
 ### aczutro ###################################################################
