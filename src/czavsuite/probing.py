@@ -102,7 +102,7 @@ class TableMaker:
 #TableMaker
 
 
-def avProbe(files: list, conf: config.Probing):
+def avProbe(files: list, mode: int, headers: bool):
     """
     Prints info on input files to STDOUT.
     Invalid files (non-existent or non-media files) are ignored silently.
@@ -114,30 +114,30 @@ def avProbe(files: list, conf: config.Probing):
                  config.Probing.AUDIO:    print only audio information
                  config.Probing.DURATION: print only duration
     """
-    if conf.mode == config.Probing.FULL:
+    if mode == config.Probing.FULL:
         for file in files:
             print(cztext.colourise(file, cztext.Col16.BLUE, bold=True))
-            print("\n".join(ffmpeg.ffprobe(file, conf.mode)))
+            print("\n".join(ffmpeg.ffprobe(file, mode)))
         #for
-    elif conf.mode == config.Probing.DURATION:
+    elif mode == config.Probing.DURATION:
         tm = TableMaker()
-        if conf.headers:
-            tm.addHeader(conf.mode)
+        if headers:
+            tm.addHeader(mode)
         #if
         for file in files:
-            tm.addDuration(file, ffmpeg.ffprobe(file, conf.mode))
+            tm.addDuration(file, ffmpeg.ffprobe(file, mode))
         #for
         print(_table2String(tm.get()))
     else:
         tm = TableMaker()
-        if conf.headers:
-            tm.addHeader(conf.mode)
+        if headers:
+            tm.addHeader(mode)
         #if
         for file in files:
-            probe = ffmpeg.ffprobe(file, conf.mode)
-            if conf.mode == config.Probing.VIDEO:
+            probe = ffmpeg.ffprobe(file, mode)
+            if mode == config.Probing.VIDEO:
                 tm.addVideo(file, probe)
-            elif conf.mode == config.Probing.AUDIO:
+            elif mode == config.Probing.AUDIO:
                 tm.addAudio(file, probe)
             else:
                 raise ValueError

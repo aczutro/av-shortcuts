@@ -19,7 +19,7 @@
 
 """main application classes"""
 
-from . import clp, config, probing, encoding, ffmpeg
+from . import clp, config, probing, ffmpeg
 from czutils.utils import czlogging, czsystem
 import sys
 
@@ -53,7 +53,7 @@ class Application:
 
         try:
             self._execute()
-        except ffmpeg.SubprocessError as e:
+        except ffmpeg.FfmpegError as e:
             _stderr(e)
         #except
     #__init__
@@ -95,7 +95,9 @@ class ApplicationProbe(Application):
 
     def _execute(self):
         try:
-            probing.avProbe(self.inputFiles, self.config[config.ConfigType.PROBING])
+            probing.avProbe(self.inputFiles,
+                            self.config[config.ConfigType.PROBING].mode,
+                            self.config[config.ConfigType.PROBING].headers)
         except KeyError as e:
             _logger.error("invalid config")
             raise e
@@ -124,14 +126,13 @@ class ApplicationToMp4(Application):
 
     def _execute(self):
         try:
-            encoding.avToMp4(self.inputFiles,
-                             self.config[config.ConfigType.GENERAL],
-                             self.config[config.ConfigType.VIDEO],
-                             self.config[config.ConfigType.AUDIO],
-                             self.config[config.ConfigType.CROPPING],
-                             self.config[config.ConfigType.CUTTING],
-                             self.config[config.ConfigType.SCALING]
-                             )
+            ffmpeg.avToMp4(self.inputFiles,
+                           self.config[config.ConfigType.GENERAL],
+                           self.config[config.ConfigType.VIDEO],
+                           self.config[config.ConfigType.AUDIO],
+                           self.config[config.ConfigType.CROPPING],
+                           self.config[config.ConfigType.CUTTING],
+                           self.config[config.ConfigType.SCALING])
         except KeyError as e:
             _logger.error("invalid config")
             raise e

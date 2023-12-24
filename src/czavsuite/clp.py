@@ -210,7 +210,7 @@ class CommandLineParser:
                 self._getGeneralSettings(container)
             elif t == config.ConfigType.VIDEO:
                 self._getVideoSettings(container)
-            elif t == config.ConfigType.AUDIO or t == config.ConfigType.NOAUDIO:
+            elif t in (config.ConfigType.AUDIO, config.ConfigType.NOAUDIO):
                 self._getAudioSettings(container)
             elif t == config.ConfigType.CROPPING:
                 self._getCroppingSettings(container)
@@ -224,6 +224,13 @@ class CommandLineParser:
                 _logger.error("invalid config type", t)
             #else
         #for
+
+        if config.ConfigType.CROPPING in configTypes \
+                and config.ConfigType.SCALING in configTypes \
+                and self.config[config.ConfigType.CROPPING].valid \
+                and self.config[config.ConfigType.SCALING].valid:
+            raise CommandLineError("-c and -s cannot be used at the same time")
+        #if
     #__init__
 
 
@@ -255,7 +262,6 @@ class CommandLineParser:
 
     def _getAudioSettings(self, container):
         conf = config.Audio()
-
         conf.codec = container.aCodec
         conf.bitrate = None
         conf.quality = None
@@ -276,8 +282,10 @@ class CommandLineParser:
             conf.quality = str(container.aQuality)
         # if
 
-        if conf.codec is None and counter > 0:
+        if conf.codec == "null" and counter > 0:
             _warning("no audio output; ignoring -ab and -aq")
+        elif conf.codec == "copy" and counter > 0:
+            _warning("copying input audio without transcoding; ignoring -ab and -aq")
         elif counter > 1:
             raise CommandLineError("-ab and -aq cannot be used together")
         # if
@@ -297,15 +305,16 @@ class CommandLineParser:
 
     def _getCroppingSettings(self, container):
         conf = config.Cropping()
-
+        conf.valid = False
         conf.left = None
         conf.right = None
         conf.down = None
         conf.up = None
 
         if container.croppingFormat is not None:
-            tokens = container.croppingFormat.split(":")
+            conf.valid = True
 
+            tokens = container.croppingFormat.split(":")
             try:
                 if len(tokens) == 2:
                     conf.left = int(tokens[0])
@@ -336,10 +345,11 @@ class CommandLineParser:
 
     def _getScalingSettings(self, container):
         conf = config.Scaling()
-
+        conf.valid = False
         conf.factor = None
 
         if container.scalingFactor is not None:
+            conf.valid = True
             if container.scalingFactor == 0:
                 raise CommandLineError("what do you expect to get if you scale video by factor 0?")
             elif container.scalingFactor < 0:
@@ -355,7 +365,7 @@ class CommandLineParser:
 
     def _getCuttingSettings(self, container):
         conf = config.Cutting()
-
+        conf.valid = False
         conf.start = None
         conf.end = None
 
@@ -363,6 +373,8 @@ class CommandLineParser:
         inconsistent = False
 
         if container.timestampRange is not None:
+            conf.valid = True
+
             tokens = container.timestampRange.split(":")
             try:
                 if len(tokens) == 2:

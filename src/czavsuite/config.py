@@ -41,8 +41,8 @@ class General:
 @czcode.autoStr
 class Video:
     def __init__(self):
-        self.codec = ""
-        self.crf = ""
+        self.codec = "h265"
+        self.crf = "23"
     #__init
 #Video
 
@@ -50,8 +50,8 @@ class Video:
 @czcode.autoStr
 class Audio:
     def __init__(self):
-        self.codec = ""
-        self.bitrate = ""
+        self.codec = "aac"
+        self.bitrate = "256k"
         self.quality = ""
     #__init
 #Audio
@@ -60,6 +60,7 @@ class Audio:
 @czcode.autoStr
 class Cropping:
     def __init__(self):
+        self.valid = False
         self.left = 0
         self.right = 0
         self.up = 0
@@ -71,7 +72,8 @@ class Cropping:
 @czcode.autoStr
 class Scaling:
     def __init__(self):
-        self.factor = .0
+        self.valid = False
+        self.factor = 1.0
     #__init
 #Scaling
 
@@ -79,8 +81,9 @@ class Scaling:
 @czcode.autoStr
 class Cutting:
     def __init__(self):
-        self.start = .0
-        self.end = .0
+        self.valid = False
+        self.start = 0.0
+        self.end = 1.0
     #__init
 #Cutting
 
