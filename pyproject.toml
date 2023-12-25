@@ -28,6 +28,7 @@ czutils = "^1.4.0"
 av-probe = "czavsuite:mainProbe"
 av-convert = "czavsuite:mainConvert"
 av-play = "czavsuite:mainPlay"
+av-script = "czavsuite:mainScript"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

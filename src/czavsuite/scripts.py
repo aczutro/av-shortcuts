@@ -17,41 +17,35 @@
 #
 ################################################################### aczutro ###
 
-"""A suite of useful scripts to serialise FFmpeg jobs
-"""
-__author__ = "Alexander Czutro <github@czutro.ch>"
-__version__ = "2.0"
+"""av-script implementation"""
+
+from . import config
 
 
-from . import application
-
-
-def mainProbe():
-    """entry point for av-probe
+def avScript(files: list, conf: config.Script):
     """
-    application.ApplicationProbe()
-#mainCut
-
-
-def mainConvert():
-    """entry point for av-convert
     """
-    application.ApplicationConvert()
-#mainToMp4
+    redirection = " >> %s" % conf.betty if conf.dry else " "
+    dry = " -dry" if conf.dry else ""
+    tTemplate = "-t :" if conf.tTemplate else ""
+    cTemplate = "-c :::" if conf.cTemplate else ""
 
+    with open(conf.wilma, "w") as buf:
+        buf.write("# -*- mode: shell-script -*-\n\n")
+        if conf.dry:
+            buf.write("rm -f %s\n\n" % conf.betty)
+        #if
+        for file in files:
+            buf.write('av-convert{_dry} {_t}\t{_c}\t"{_file}"{_redirection}\n'.format(
+                _dry=dry,
+                _file=file,
+                _redirection=redirection,
+                _t=tTemplate,
+                _c=cTemplate))
+    #with
 
-def mainPlay():
-    """entry point for av-play
-    """
-    application.ApplicationPlay()
-#mainPlay
-
-
-def mainScript():
-    """entry point for av-script
-    """
-    application.ApplicationScript()
-#mainPlay
+    print("script saved to '%s'" % conf.wilma)
+#avScript
 
 
 ### aczutro ###################################################################

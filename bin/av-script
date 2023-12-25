@@ -22,7 +22,7 @@
 import czavsuite
 
 if __name__ == '__main__':
-    czavsuite.mainPlay()
+    czavsuite.mainScript()
 #if
 
 ### aczutro ###################################################################

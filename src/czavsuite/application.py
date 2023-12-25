@@ -19,7 +19,7 @@
 
 """main application classes"""
 
-from . import clp, config, probing, convert, utils
+from . import clp, config, probing, convert, utils, scripts
 from czutils.utils import czlogging, czsystem
 import sys
 
@@ -176,6 +176,30 @@ class ApplicationPlay(Application):
     #_execute
 
 #ApplicationPlay
+
+
+class ApplicationScript(Application):
+    """entry point for av-script
+    """
+    def __init__(self):
+        """constructor
+        """
+        appDescription = "Creates a script to serialise convert jobs with individual job settings."
+        configTypes = [ config.ConfigType.SCRIPT ]
+        super().__init__(appDescription, configTypes)
+    #__init__
+
+
+    def _execute(self):
+        try:
+            scripts.avScript(self.inputFiles, self.config[config.ConfigType.SCRIPT])
+        except KeyError as e:
+            _logger.error("invalid config")
+            raise e
+        #except
+    #_execute
+
+#ApplicationScript
 
 
 ### aczutro ###################################################################

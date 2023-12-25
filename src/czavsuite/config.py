@@ -25,7 +25,7 @@ from czutils.utils import czcode
 class ConfigType:
     """"Enum class" for config types.
     """
-    GENERAL, VIDEO, AUDIO, CROPPING, SCALING, CUTTING, PROBING = range(7)
+    GENERAL, VIDEO, AUDIO, CROPPING, SCALING, CUTTING, PROBING, SCRIPT = range(8)
 #ConfigType
 
 
@@ -96,6 +96,18 @@ class Probing:
         self.mode = Probing.FULL
     #__init
 #Probing
+
+
+@czcode.autoStr
+class Script:
+    def __init__(self):
+        self.dry = False
+        self.wilma = ".wilma"
+        self.betty = ".betty"
+        self.tTemplate = False
+        self.cTemplate = False
+    #__init
+#Script
 
 
 ### aczutro ###################################################################

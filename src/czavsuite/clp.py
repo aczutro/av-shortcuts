@@ -192,34 +192,64 @@ class CommandLineParser:
                                     )
         #if
         if config.ConfigType.PROBING in configTypes:
-            parser.add_argument("-v",
-                                dest="probingMode",
-                                action="store_const",
-                                const=config.Probing.VIDEO,
-                                default=config.Probing.FULL,
-                                help="print only video information"
-                                )
-            parser.add_argument("-a",
-                                dest="probingMode",
-                                action="store_const",
-                                const=config.Probing.AUDIO,
-                                default=config.Probing.FULL,
-                                help="print only audio information"
-                                )
-            parser.add_argument("-d",
-                                dest="probingMode",
-                                action="store_const",
-                                const=config.Probing.DURATION,
-                                default=config.Probing.FULL,
-                                help="print only duration"
-                                )
-            parser.add_argument("-h",
-                                dest="headers",
-                                action="store_const",
-                                const=True,
-                                default=False,
-                                help="print table headers"
-                                )
+            probeGroup = parser.add_argument_group()
+            probeGroup.add_argument("-v",
+                                    dest="probingMode",
+                                    action="store_const",
+                                    const=config.Probing.VIDEO,
+                                    default=config.Probing.FULL,
+                                    help="print only video information"
+                                    )
+            probeGroup.add_argument("-a",
+                                    dest="probingMode",
+                                    action="store_const",
+                                    const=config.Probing.AUDIO,
+                                    default=config.Probing.FULL,
+                                    help="print only audio information"
+                                    )
+            probeGroup.add_argument("-d",
+                                    dest="probingMode",
+                                    action="store_const",
+                                    const=config.Probing.DURATION,
+                                    default=config.Probing.FULL,
+                                    help="print only duration"
+                                    )
+            probeGroup.add_argument("-h",
+                                    dest="headers",
+                                    action="store_true",
+                                    help="print table headers"
+                                    )
+        #if
+        if config.ConfigType.SCRIPT in configTypes:
+            scriptGroup = parser.add_argument_group()
+            scriptGroup.add_argument("-dry",
+                                     action="store_true",
+                                     help="add -dry flag to av-convert commands in the script; "
+                                          "this means that executing the script will only "
+                                          "translate the script into FFmpeg commands that will be "
+                                          "written into the 'betty' file"
+                                     )
+            scriptGroup.add_argument("-wilma",
+                                     metavar="FILENAME",
+                                     type=str,
+                                     help="output file name (default: %s)" % config.Script().wilma
+                                     )
+            scriptGroup.add_argument("-betty",
+                                     metavar="FILENAME",
+                                     type=str,
+                                     help="output file name for dry run (default: %s)" %
+                                          config.Script().betty
+                                     )
+            scriptGroup.add_argument("-c",
+                                     dest="cTemplate",
+                                     action="store_true",
+                                     help="add empty -c option to script"
+                                     )
+            scriptGroup.add_argument("-t",
+                                     dest="tTemplate",
+                                     action="store_true",
+                                     help="add empty -t option to script"
+                                     )
         #if
 
         try:
@@ -247,6 +277,8 @@ class CommandLineParser:
                 self._getCuttingSettings(container)
             elif t == config.ConfigType.PROBING:
                 self._getProbingSettings(container)
+            elif t == config.ConfigType.SCRIPT:
+                self._getScriptSettings(container)
             else:
                 _logger.error("invalid config type", t)
             #else
@@ -462,6 +494,26 @@ class CommandLineParser:
         conf.mode = container.probingMode
         self.config[config.ConfigType.PROBING] = conf
     #_getProbingSettings
+
+
+    def _getScriptSettings(self, container):
+        conf = config.Script()
+        conf.dry = container.dry
+        conf.cTemplate = container.cTemplate
+        conf.tTemplate = container.tTemplate
+
+        if container.wilma is not None:
+            conf.wilma = container.wilma
+        #if
+        if container.betty is not None:
+            conf.betty = container.betty
+            if not conf.dry:
+                _warning("producing a non-dry script; ignoring -betty")
+            #if
+        #if
+
+        self.config[config.ConfigType.SCRIPT] = conf
+    #_getScriptSettings
 
 #CommandLineParser
 
