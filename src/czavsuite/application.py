@@ -19,7 +19,7 @@
 
 """main application classes"""
 
-from . import clp, config, probing, convert
+from . import clp, config, probing, convert, utils
 from czutils.utils import czlogging, czsystem
 import sys
 
@@ -27,6 +27,10 @@ import sys
 _logger = czlogging.LoggingChannel(czsystem.appName(),
                                    czlogging.LoggingLevel.ERROR,
                                    colour=True)
+clp.setLoggingOptions(czlogging.LoggingLevel.ERROR)
+convert.setLoggingOptions(czlogging.LoggingLevel.ERROR)
+probing.setLoggingOptions(czlogging.LoggingLevel.ERROR)
+utils.setLoggingOptions(czlogging.LoggingLevel.ERROR)
 
 
 def _stderr(err: str):
@@ -64,7 +68,6 @@ class Application:
             self.inputFiles = CLP.args
             self.config = CLP.config
         except clp.CommandLineError as e:
-            _logger.error(e)
             _stderr(e)
             sys.exit(2)
         #except

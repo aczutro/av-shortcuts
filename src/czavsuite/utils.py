@@ -26,8 +26,25 @@ import subprocess
 
 
 _logger = czlogging.LoggingChannel("czavsuite.utils",
-                                   czlogging.LoggingLevel.ERROR,
+                                   czlogging.LoggingLevel.SILENT,
                                    colour=True)
+
+def setLoggingOptions(level: int, colour=True) -> None:
+    """
+    Sets this module's logging level.  If not called, the logging level is
+    SILENT.
+
+    :param level: One of the following:
+                  - czlogging.LoggingLevel.INFO
+                  - czlogging.LoggingLevel.WARNING
+                  - czlogging.LoggingLevel.ERROR
+                  - czlogging.LoggingLevel.SILENT
+
+    :param colour: If true, use colour in log headers.
+    """
+    global _logger
+    _logger = czlogging.LoggingChannel("czavsuite.utils", level, colour=colour)
+#setLoggingOptions
 
 
 class UtilsError(Exception):
