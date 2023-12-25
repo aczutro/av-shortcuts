@@ -142,25 +142,43 @@ class TableMaker:
     #addHeader
 
     def addVideo(self, file: str, probe: dict):
-        self._table.append([ probe["codec_name"],
-                             "%sx%s" % (probe["width"], probe["height"]),
-                             probe["display_aspect_ratio"],
-                             probe["avg_frame_rate"],
-                             file ])
+        try:
+            try:
+                framerateTokens = probe["avg_frame_rate"].split(sep='/')
+                num = float(framerateTokens[0])
+                den = float(framerateTokens[1])
+                framerate = str(round(num / den, 2))
+            except IndexError:
+                framerate = probe["avg_frame_rate"]
+            except ValueError:
+                framerate = probe["avg_frame_rate"]
+            #except
+            self._table.append([ probe["codec_name"],
+                                 "%sx%s" % (probe["width"], probe["height"]),
+                                 probe["display_aspect_ratio"],
+                                 framerate,
+                                 file ])
+        except KeyError:
+            self._table.append([ 'null', '--', '--', '--', file ])
+        #except
     #addVideo
 
 
     def addAudio(self, file: str, probe: dict):
         try:
-            bitRate = "%d kb/s" % (int(probe["bit_rate"]) / 1000)
-        except ValueError:
-            bitRate = probe["bit_rate"]
+            try:
+                bitRate = "%d kb/s" % (float(probe["bit_rate"]) / 1000)
+            except ValueError:
+                bitRate = probe["bit_rate"]
+            #except
+            self._table.append([ probe["codec_name"],
+                                 "%s Hz" % probe["sample_rate"],
+                                 probe["channel_layout"],
+                                 bitRate,
+                                 file ])
+        except KeyError:
+            self._table.append([ 'null', '--', '--', '--', file ])
         #except
-        self._table.append([ probe["codec_name"],
-                             "%s Hz" % probe["sample_rate"],
-                             probe["channel_layout"],
-                             bitRate,
-                             file ])
     #addAudio
 
 

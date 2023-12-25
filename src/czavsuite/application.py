@@ -105,6 +105,8 @@ class ApplicationProbe(Application):
         except KeyError as e:
             _logger.error("invalid config")
             raise e
+        except utils.UtilsError as e:
+            _stderr(e)
         #except
     #_execute
 
