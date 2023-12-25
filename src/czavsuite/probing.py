@@ -17,7 +17,7 @@
 #
 ################################################################### aczutro ###
 
-"""probing functionality"""
+"""av-probe implementation"""
 
 from . import config, utils
 from czutils.utils import cztext, czlogging
@@ -38,12 +38,11 @@ def _ffprobeDict(lines: list):
         #if
     #for
     return ans
-#_getDict
+#_ffprobeDict
 
 
 def ffprobe(file: str, mode: int):
     """
-    TODO
     """
     S = utils.SystemCaller(True)
 
@@ -98,7 +97,8 @@ def _table2String(table):
 
 
 class TableMaker:
-
+    """
+    """
     def __init__(self):
         self._table = []
     #__init__
@@ -144,12 +144,12 @@ class TableMaker:
                              probe["channel_layout"],
                              bitRate,
                              file ])
-    #addVideo
+    #addAudio
 
 
     def addDuration(self, file: str, duration: str):
         self._table.append([ duration, file ])
-    #addVideo
+    #addDuration
 
 #TableMaker
 
@@ -188,4 +188,7 @@ def avProbe(files: list, mode: int, headers: bool):
         #for
         print(_table2String(tm.get()))
     #else
-#probe
+#avProbe
+
+
+### aczutro ###################################################################

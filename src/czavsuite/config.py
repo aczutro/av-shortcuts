@@ -23,11 +23,10 @@ from czutils.utils import czcode
 
 
 class ConfigType:
-    """enum class for config types
+    """"Enum class" for config types.
     """
     GENERAL, VIDEO, AUDIO, CROPPING, SCALING, CUTTING, PROBING = range(7)
-
-# ConfigType
+#ConfigType
 
 
 @czcode.autoStr
@@ -96,7 +95,7 @@ class Probing:
         self.headers = False
         self.mode = Probing.FULL
     #__init
-#Cutting
+#Probing
 
 
 ### aczutro ###################################################################

@@ -31,21 +31,23 @@ _logger = czlogging.LoggingChannel("czavsuite.clp",
 
 def _warning(*args):
     print("%s: warning:" % czsystem.appName(), " ".join(args))
+#_warning
 
 
 class CommandLineError(Exception):
     pass
+#CommandLineError
 
 
 class CommandLineParser:
-    """common command line parser"""
+    """Common command line parser.
 
+    Constructor params:
+
+    :param appDescription:  app description for help text
+    :param configTypes:     list of OptionIDs to include
+    """
     def __init__(self, appDescription: str, configTypes: list):
-        """constructor
-
-        :param appDescription:  app description for help text
-        :param configTypes:     list of OptionIDs to include
-        """
         self.args = []
         self.config = {}
 
@@ -76,7 +78,7 @@ class CommandLineParser:
                                       action="store_true",
                                       help="only print FFmpeg command line; don't execute it"
                                       )
-        # if
+        #if
         if config.ConfigType.VIDEO in configTypes:
             videoGroup.add_argument("-avc",
                                     dest="vCodec",
@@ -106,7 +108,7 @@ class CommandLineParser:
                                     help="video quality: 0 is best, 51 is worst (default: %s)" %
                                          config.Video().crf
                                     )
-        # if
+        #if
         if config.ConfigType.AUDIO in configTypes:
             audioGroup.add_argument("-mp3",
                                     dest="aCodec",
@@ -143,7 +145,7 @@ class CommandLineParser:
                                     help="mp3 only: 0 is best, 9 is worst (mp3 default: %s)" %
                                          config.Audio().quality
                                     )
-        # if
+        #if
         if config.ConfigType.CROPPING in configTypes:
             transGroup.add_argument("-c",
                                     metavar="LEFT[:RIGHT]:UP[:DOWN]",
@@ -153,7 +155,7 @@ class CommandLineParser:
                                          "if only LEFT:UP are given, "
                                          "RIGHT = LEFT and DOWN = UP"
                                     )
-        # if
+        #if
         if config.ConfigType.SCALING in configTypes:
             transGroup.add_argument("-s",
                                     metavar="FACTOR",
@@ -161,7 +163,7 @@ class CommandLineParser:
                                     type=float,
                                     help="scale video by this factor"
                                     )
-        # if
+        #if
         if config.ConfigType.CUTTING in configTypes:
             transGroup.add_argument("-t",
                                     dest="timestampRange",
@@ -171,7 +173,7 @@ class CommandLineParser:
                                          "empty START means START = 0; "
                                          "empty END means END = end of input stream"
                                     )
-        # if
+        #if
         if config.ConfigType.PROBING in configTypes:
             parser.add_argument("-v",
                                 dest="probingMode",
@@ -201,7 +203,7 @@ class CommandLineParser:
                                 default=False,
                                 help="print table headers"
                                 )
-        # if
+        #if
 
         try:
             container = parser.parse_args()
@@ -247,7 +249,7 @@ class CommandLineParser:
         conf = config.General()
         conf.dry = container.dry
         self.config[config.ConfigType.GENERAL] = conf
-    # _getGeneralSettings
+    #_getGeneralSettings
 
 
     def _getVideoSettings(self, container):
@@ -265,12 +267,12 @@ class CommandLineParser:
                 _warning("no video output; ignoring -vq")
             elif container.crf < 0 or container.crf > 51:
                 raise CommandLineError("CRF must be between 0 and 51")
-            # if
+            #if
             conf.crf = str(container.crf)
-        # if
+        #if
 
         self.config[config.ConfigType.VIDEO] = conf
-    # _getVideoSettings
+    #_getVideoSettings
 
 
     def _getAudioSettings(self, container):
@@ -319,7 +321,7 @@ class CommandLineParser:
         #else
 
         self.config[config.ConfigType.AUDIO] = conf
-    # _getAudioSettings
+    #_getAudioSettings
 
 
     def _getCroppingSettings(self, container):
@@ -353,10 +355,10 @@ class CommandLineParser:
                 raise CommandLineError("cropping format: a negative number "
                                        "of pixels doesn't make sense")
             #if
-        # if
+        #if
 
         self.config[config.ConfigType.CROPPING] = conf
-    # _getCroppingSettings
+    #_getCroppingSettings
 
 
     def _getScalingSettings(self, container):
@@ -377,7 +379,7 @@ class CommandLineParser:
         #if
 
         self.config[config.ConfigType.SCALING] = conf
-    # _getScalingSettings
+    #_getScalingSettings
 
 
     def _getCuttingSettings(self, container):
@@ -431,10 +433,10 @@ class CommandLineParser:
             if inconsistent:
                 raise CommandLineError("cutting timestamps: start time must be less than end time")
             #if
-        # if
+        #if
 
         self.config[config.ConfigType.CUTTING] = conf
-    # _getCuttingSettings
+    #_getCuttingSettings
 
 
     def _getProbingSettings(self, container):
@@ -442,9 +444,9 @@ class CommandLineParser:
         conf.headers = container.headers
         conf.mode = container.probingMode
         self.config[config.ConfigType.PROBING] = conf
-    # _getProbingSettings
+    #_getProbingSettings
 
-# CommandLineParser
+#CommandLineParser
 
 
 ### aczutro ###################################################################

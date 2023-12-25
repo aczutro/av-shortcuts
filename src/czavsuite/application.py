@@ -25,7 +25,7 @@ import sys
 
 
 _logger = czlogging.LoggingChannel(czsystem.appName(),
-                                   czlogging.LoggingLevel.INFO,
+                                   czlogging.LoggingLevel.ERROR,
                                    colour=True)
 
 
@@ -35,11 +35,10 @@ def _stderr(err: str):
 
 
 class Application:
-    """base application class
-
-    provides interface for command line parsing and task execution
+    """Base application class.
+    Parses command line and calls _execute(), which needs to be implemented in
+    derived classes.
     """
-
     def __init__(self, appDescription: str, configTypes: list):
         """constructor
 
@@ -93,6 +92,7 @@ class ApplicationProbe(Application):
         super().__init__(appDescription, configTypes)
     #__init__
 
+
     def _execute(self):
         try:
             probing.avProbe(self.inputFiles,
@@ -117,11 +117,12 @@ class ApplicationConvert(Application):
         configTypes = [ config.ConfigType.GENERAL,
                         config.ConfigType.VIDEO,
                         config.ConfigType.AUDIO,
-                        config.ConfigType.CUTTING,
                         config.ConfigType.CROPPING,
-                        config.ConfigType.SCALING ]
+                        config.ConfigType.SCALING,
+                        config.ConfigType.CUTTING ]
         super().__init__(appDescription, configTypes)
     #__init__
+
 
     def _execute(self):
         try:
@@ -130,15 +131,15 @@ class ApplicationConvert(Application):
                               self.config[config.ConfigType.VIDEO],
                               self.config[config.ConfigType.AUDIO],
                               self.config[config.ConfigType.CROPPING],
-                              self.config[config.ConfigType.CUTTING],
-                              self.config[config.ConfigType.SCALING])
+                              self.config[config.ConfigType.SCALING],
+                              self.config[config.ConfigType.CUTTING])
         except KeyError as e:
             _logger.error("invalid config")
             raise e
         #except
     #_execute
 
-#ApplicationToMp4
+#ApplicationConvert
 
 
 class ApplicationPlay(Application):
@@ -154,6 +155,19 @@ class ApplicationPlay(Application):
                         config.ConfigType.CUTTING ]
         super().__init__(appDescription, configTypes)
     #__init__
+
+
+    def _execute(self):
+        try:
+            convert.avPlay(self.inputFiles,
+                           self.config[config.ConfigType.CROPPING],
+                           self.config[config.ConfigType.SCALING],
+                           self.config[config.ConfigType.CUTTING])
+        except KeyError as e:
+            _logger.error("invalid config")
+            raise e
+        #except
+    #_execute
 
 #ApplicationPlay
 

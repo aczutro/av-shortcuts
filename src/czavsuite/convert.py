@@ -17,7 +17,7 @@
 #
 ################################################################### aczutro ###
 
-"""FFmpeg wrapper"""
+"""av-convert and av-play implementation"""
 
 from . import config, probing, utils
 from czutils.utils import czlogging
@@ -31,6 +31,7 @@ _logger = czlogging.LoggingChannel("czavsuite.convert",
 
 class ConvertError(Exception):
     pass
+#ConvertError
 
 
 def _outputFilename(inputFile: str, videoCodec: str, audioCodec: str):
@@ -65,7 +66,7 @@ def _outputFilename(inputFile: str, videoCodec: str, audioCodec: str):
     #else
 
     return outputFile
-#def
+#_outputFilename
 
 
 def _checkExistence(filename: str):
@@ -85,7 +86,7 @@ def _checkExistence(filename: str):
     except PermissionError as e:
         raise ConvertError(e)
     #except
-#def
+#_checkExistence
 
 
 def _toFFmpegVideo(conf: config.Video) -> list:
@@ -130,7 +131,7 @@ def _toFFmpegAudio(conf: config.Audio) -> list:
     else:
         raise ValueError
     #else
-#_toFFmpegVideo
+#_toFFmpegAudio
 
 
 def _toFFmpegCropping(conf: config.Cropping) -> list:
@@ -177,8 +178,8 @@ def avConvert(files: list,
               confVideo: config.Video,
               confAudio: config.Audio,
               confCropping: config.Cropping,
-              confCutting: config.Cutting,
-              confScaling: config.Scaling):
+              confScaling: config.Scaling,
+              confCutting: config.Cutting):
     S = utils.SystemCaller(True)
     for file in files:
         outputFile = _outputFilename(file, confVideo.codec, confAudio.codec)
@@ -196,4 +197,24 @@ def avConvert(files: list,
             print("=======================")
         #if
     #for
-#avToMp4
+#avConvert
+
+
+def avPlay(files: list,
+           confCropping: config.Cropping,
+           confScaling: config.Scaling,
+           confCutting: config.Cutting):
+    S = utils.SystemCaller(True)
+    for file in files:
+        cmd = ([ 'ffplay', file ] + _toFFmpegCropping(confCropping) +
+               _toFFmpegScaling(file, confScaling) + _toFFmpegCuttting(confCutting))
+        print(" ".join(cmd))
+        returnCode = S.call(cmd)
+        _logger.info("return code:", returnCode)
+        _logger.info("stdout:", S.stdout())
+        _logger.info("stderr:", S.stderr())
+    #for
+#avPlay
+
+
+### aczutro ###################################################################
