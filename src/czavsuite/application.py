@@ -58,6 +58,7 @@ class Application:
             self._execute()
         except convert.ConvertError as e:
             _stderr(e)
+            sys.exit(1)
         #except
     #__init__
 

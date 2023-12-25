@@ -198,6 +198,7 @@ def avConvert(files: list,
               confScaling: config.Scaling,
               confCutting: config.Cutting):
     S = utils.SystemCaller(True)
+    ans = 0
     for file in files:
         outputFile = _outputFilename(file, confVideo.codec, confAudio.codec)
         _checkExistence(outputFile)
@@ -206,14 +207,20 @@ def avConvert(files: list,
                _toFFmpegAudio(confAudio) + _toFFmpegCuttting(confCutting) + [ outputFile ])
         print(" ".join(cmd))
         if not confGeneral.dry:
-            returnCode = S.call(cmd)
-            _logger.info("return code:", returnCode)
-            _logger.info("stdout:", S.stdout())
-            _logger.info("stderr:", S.stderr())
-            print(S.stderr())
-            print("=======================")
+            try:
+                returnCode = S.call(cmd)
+                ans |= returnCode
+                _logger.info("return code:", returnCode)
+                _logger.info("stdout:", S.stdout())
+                _logger.info("stderr:", S.stderr())
+                print(S.stderr())
+                print("=======================")
+            except utils.UtilsError as e:
+                raise ConvertError(e)
+            #except
         #if
     #for
+    return ans
 #avConvert
 
 
@@ -222,15 +229,23 @@ def avPlay(files: list,
            confScaling: config.Scaling,
            confCutting: config.Cutting):
     S = utils.SystemCaller(True)
+    ans = 0
     for file in files:
-        cmd = ([ 'ffplay', file ] + _toFFmpegCropping(confCropping) +
+        cmd = ([ 'ffplay', '-hide_banner', file ] + _toFFmpegCropping(confCropping) +
                _toFFmpegScaling(file, confScaling) + _toFFmpegCuttting(confCutting))
         print(" ".join(cmd))
-        returnCode = S.call(cmd)
-        _logger.info("return code:", returnCode)
-        _logger.info("stdout:", S.stdout())
-        _logger.info("stderr:", S.stderr())
+        try:
+            returnCode = S.call(cmd)
+            ans |= returnCode
+            _logger.info("return code:", returnCode)
+            _logger.info("stdout:", S.stdout())
+            _logger.info("stderr:", S.stderr())
+            print(S.stderr())
+        except utils.UtilsError as e:
+            raise ConvertError(e)
+        #except
     #for
+    return ans
 #avPlay
 
 
