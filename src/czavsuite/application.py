@@ -147,10 +147,9 @@ class ApplicationPlay(Application):
     def __init__(self):
         """constructor
         """
-        appDescription = "plays video and offers a simplified way of specifying "\
-                         "cropping and scaling parameters"
-        configTypes = [ config.ConfigType.GENERAL,
-                        config.ConfigType.CROPPING,
+        appDescription = "Plays video and offers a simplified way of specifying "\
+                         "cropping and scaling parameters."
+        configTypes = [ config.ConfigType.CROPPING,
                         config.ConfigType.SCALING,
                         config.ConfigType.CUTTING ]
         super().__init__(appDescription, configTypes)

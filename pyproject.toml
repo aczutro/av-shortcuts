@@ -26,7 +26,8 @@ czutils = "^1.4.0"
 
 [tool.poetry.scripts]
 av-probe = "czavsuite:mainProbe"
-av-to-mp4 = "czavsuite:mainToMp4"
+av-convert = "czavsuite:mainConvert"
+av-play = "czavsuite:mainPlay"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
