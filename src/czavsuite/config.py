@@ -25,7 +25,7 @@ from czutils.utils import czcode
 class ConfigType:
     """enum class for config types
     """
-    GENERAL, VIDEO, AUDIO, NOAUDIO, CROPPING, SCALING, CUTTING, PROBING = range(8)
+    GENERAL, VIDEO, AUDIO, CROPPING, SCALING, CUTTING, PROBING = range(7)
 
 # ConfigType
 
@@ -52,7 +52,7 @@ class Audio:
     def __init__(self):
         self.codec = "aac"
         self.bitrate = "256k"
-        self.quality = ""
+        self.quality = "0"
     #__init
 #Audio
 

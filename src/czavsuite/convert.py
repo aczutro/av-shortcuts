@@ -33,9 +33,22 @@ class ConvertError(Exception):
     pass
 
 
-def _outputFilename(inputFile: str, outputType: str):
+def _outputFilename(inputFile: str, videoCodec: str, audioCodec: str):
     """
     """
+    if not videoCodec == "null":
+        outputType = "mp4"
+    elif audioCodec == "aac":
+        outputType = "m4a"
+    elif audioCodec == "mp3":
+        outputType = "mp3"
+    elif audioCodec == "copy":
+        inputCodec = probing.ffprobe(inputFile, config.Probing.AUDIO)["codec_name"]
+        outputType = "mp3" if inputCodec == "mp3" else "m4a"
+    else:
+        raise ValueError
+    #else
+
     tokens = inputFile.split('.')
 
     if len(tokens) == 1:
@@ -101,7 +114,7 @@ def _toFFmpegAudio(conf: config.Audio) -> list:
         #if
     elif conf.codec == "mp3":
         codec = [ "-c:a", "libmp3lame" ]
-        if conf.bitrate is not None and conf.quality is not None:
+        if conf.bitrate and conf.quality:
             raise ValueError
         elif conf.bitrate is not None:
             return codec + [ "-b:a", conf.bitrate ]
@@ -168,7 +181,7 @@ def avConvert(files: list,
               confScaling: config.Scaling):
     S = utils.SystemCaller(True)
     for file in files:
-        outputFile = _outputFilename(file, "mp4")
+        outputFile = _outputFilename(file, confVideo.codec, confAudio.codec)
         _checkExistence(outputFile)
         cmd = ([ 'ffmpeg', '-hide_banner', '-i', file ] + _toFFmpegCropping(confCropping) +
                _toFFmpegScaling(file, confScaling) + _toFFmpegVideo(confVideo) +

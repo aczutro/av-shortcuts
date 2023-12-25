@@ -25,7 +25,7 @@ import sys
 
 
 _logger = czlogging.LoggingChannel(czsystem.appName(),
-                                   czlogging.LoggingLevel.ERROR,
+                                   czlogging.LoggingLevel.INFO,
                                    colour=True)
 
 
@@ -88,7 +88,7 @@ class ApplicationProbe(Application):
     def __init__(self):
         """constructor
         """
-        appDescription = "ffprobe wrapper"
+        appDescription = "Extracts audio and video information from media files."
         configTypes = [ config.ConfigType.PROBING ]
         super().__init__(appDescription, configTypes)
     #__init__
@@ -113,11 +113,10 @@ class ApplicationConvert(Application):
     def __init__(self):
         """constructor
         """
-        appDescription = "Converts video files to mp4."
+        appDescription = "Converts media files to mp4, m4a or mp3."
         configTypes = [ config.ConfigType.GENERAL,
                         config.ConfigType.VIDEO,
                         config.ConfigType.AUDIO,
-                        config.ConfigType.NOAUDIO,
                         config.ConfigType.CUTTING,
                         config.ConfigType.CROPPING,
                         config.ConfigType.SCALING ]

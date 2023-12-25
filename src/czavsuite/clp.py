@@ -92,11 +92,19 @@ class CommandLineParser:
                                     default="h265",
                                     help="copy video track from input file"
                                     )
+            videoGroup.add_argument("-vnull",
+                                    dest="vCodec",
+                                    action="store_const",
+                                    const="null",
+                                    default="h265",
+                                    help="no video"
+                                    )
             videoGroup.add_argument("-vq",
                                     metavar="CRF",
                                     dest="crf",
                                     type=int,
-                                    help="video quality: 0 is best, 51 is worst (default: 23)"
+                                    help="video quality: 0 is best, 51 is worst (default: %s)" %
+                                         config.Video().crf
                                     )
         # if
         if config.ConfigType.AUDIO in configTypes:
@@ -114,8 +122,6 @@ class CommandLineParser:
                                     default="aac",
                                     help="copy audio track from input file"
                                     )
-        #if
-        if config.ConfigType.NOAUDIO in configTypes:
             audioGroup.add_argument("-anull",
                                     dest="aCodec",
                                     action="store_const",
@@ -123,19 +129,19 @@ class CommandLineParser:
                                     default="aac",
                                     help="no audio"
                                     )
-        #if
-        if config.ConfigType.AUDIO in configTypes:
             audioGroup.add_argument("-ab",
                                     metavar="BITRATE",
                                     dest="aBitrate",
                                     type=str,
-                                    help="aac or mp3 bitrate (aac default: '256k')"
+                                    help="aac or mp3 bitrate (aac default: %s)" %
+                                         config.Audio().bitrate
                                     )
             audioGroup.add_argument("-aq",
                                     metavar="QUALITY",
                                     dest="aQuality",
                                     type=int,
-                                    help="mp3 only: 0 is best, 9 is worst (mp3 default: 0)"
+                                    help="mp3 only: 0 is best, 9 is worst (mp3 default: %s)" %
+                                         config.Audio().quality
                                     )
         # if
         if config.ConfigType.CROPPING in configTypes:
@@ -204,13 +210,15 @@ class CommandLineParser:
         #except
 
         self.args = container.FILE
+        self._cropAndScale = 0
+        self._noOutput = 0
 
         for t in configTypes:
             if t == config.ConfigType.GENERAL:
                 self._getGeneralSettings(container)
             elif t == config.ConfigType.VIDEO:
                 self._getVideoSettings(container)
-            elif t in (config.ConfigType.AUDIO, config.ConfigType.NOAUDIO):
+            elif t == config.ConfigType.AUDIO:
                 self._getAudioSettings(container)
             elif t == config.ConfigType.CROPPING:
                 self._getCroppingSettings(container)
@@ -225,11 +233,12 @@ class CommandLineParser:
             #else
         #for
 
-        if config.ConfigType.CROPPING in configTypes \
-                and config.ConfigType.SCALING in configTypes \
-                and self.config[config.ConfigType.CROPPING].valid \
-                and self.config[config.ConfigType.SCALING].valid:
+        if self._cropAndScale == 3:
             raise CommandLineError("-c and -s cannot be used at the same time")
+        #if
+        if self._noOutput == 3:
+            raise CommandLineError("cowardly refusing to create media files with no video and no "
+                                   "audio")
         #if
     #__init__
 
@@ -243,13 +252,17 @@ class CommandLineParser:
 
     def _getVideoSettings(self, container):
         conf = config.Video()
-
         conf.codec = container.vCodec
-        conf.crf = "23"
+
+        if conf.codec == "null":
+            self._noOutput |= 1
+        #if
 
         if container.crf is not None:
             if conf.codec == "copy":
                 _warning("copying input video without transcoding; ignoring -vq")
+            elif conf.codec == "null":
+                _warning("no video output; ignoring -vq")
             elif container.crf < 0 or container.crf > 51:
                 raise CommandLineError("CRF must be between 0 and 51")
             # if
@@ -263,41 +276,47 @@ class CommandLineParser:
     def _getAudioSettings(self, container):
         conf = config.Audio()
         conf.codec = container.aCodec
-        conf.bitrate = None
-        conf.quality = None
 
-        counter = 0
-        if container.aBitrate is not None:
-            counter += 1
-            conf.bitrate = container.aBitrate
-        # if
-        if container.aQuality is not None:
-            if conf.codec != "mp3":
-                raise CommandLineError("-aq can only be used with -mp3")
+        if conf.codec == "aac":
+            if container.aBitrate is not None:
+                conf.bitrate = container.aBitrate
             #if
-            if container.aQuality < 0 or container.aQuality > 9:
-                raise CommandLineError("QUALITY must be between 0 and 9")
-            # if
-            counter += 1
-            conf.quality = str(container.aQuality)
-        # if
-
-        if conf.codec == "null" and counter > 0:
-            _warning("no audio output; ignoring -ab and -aq")
-        elif conf.codec == "copy" and counter > 0:
-            _warning("copying input audio without transcoding; ignoring -ab and -aq")
-        elif counter > 1:
-            raise CommandLineError("-ab and -aq cannot be used together")
-        # if
-
-        if counter == 0:
-            if conf.codec == "aac":
-                conf.bitrate = "256k"
+            if container.aQuality is not None:
+                _warning("using AAC audio; ignoring -aq")
             #if
-            if conf.codec == "mp3":
-                conf.quality = "0"
+        elif conf.codec == "mp3":
+            conf.bitrate = None
+            if container.aQuality is not None and container.aBitrate is not None:
+                raise CommandLineError("-ab and -aq cannot be used together")
+            elif container.aBitrate is not None:
+                conf.bitrate = container.aBitrate
+                conf.quality = None
+            elif container.aQuality is not None:
+                if container.aQuality < 0 or container.aQuality > 9:
+                    raise CommandLineError("QUALITY must be between 0 and 9")
+                else:
+                    conf.quality = str(container.aQuality)
+                #else
+            #elif
+        elif conf.codec == "copy":
+            if container.aQuality is not None:
+                _warning("copying input audio without transcoding; ignoring -aq")
             #if
-        #if
+            if container.aBitrate is not None:
+                _warning("copying input audio without transcoding; ignoring -ab")
+            #if
+        elif conf.codec == "null":
+            self._noOutput |= 2
+            if container.aQuality is not None:
+                _warning("no audio output; ignoring -aq")
+            #if
+            if container.aBitrate is not None:
+                _warning("no audio output; ignoring -ab")
+            #if
+        else:
+            _logger.error("invalid conf.codec value")
+            raise Exception("invalid conf.codec value")
+        #else
 
         self.config[config.ConfigType.AUDIO] = conf
     # _getAudioSettings
@@ -306,13 +325,10 @@ class CommandLineParser:
     def _getCroppingSettings(self, container):
         conf = config.Cropping()
         conf.valid = False
-        conf.left = None
-        conf.right = None
-        conf.down = None
-        conf.up = None
 
         if container.croppingFormat is not None:
             conf.valid = True
+            self._cropAndScale |= 1
 
             tokens = container.croppingFormat.split(":")
             try:
@@ -346,10 +362,11 @@ class CommandLineParser:
     def _getScalingSettings(self, container):
         conf = config.Scaling()
         conf.valid = False
-        conf.factor = None
 
         if container.scalingFactor is not None:
             conf.valid = True
+            self._cropAndScale |= 2
+
             if container.scalingFactor == 0:
                 raise CommandLineError("what do you expect to get if you scale video by factor 0?")
             elif container.scalingFactor < 0:
