@@ -251,6 +251,17 @@ class CommandLineParser:
                                      help="add empty -t option to script"
                                      )
         #if
+        if config.ConfigType.CLASSIFY in configTypes:
+            scriptGroup = parser.add_argument_group()
+            scriptGroup.add_argument("-i",
+                                     action="store_true",
+                                     help="use image viewer instead of media player"
+                                     )
+            scriptGroup.add_argument("-m",
+                                     action="store_true",
+                                     help="mute media player (ignored if AV_CLASS_PLAYER is set)"
+                                     )
+        #if
 
         try:
             container = parser.parse_args()
@@ -279,6 +290,8 @@ class CommandLineParser:
                 self._getProbingSettings(container)
             elif t == config.ConfigType.SCRIPT:
                 self._getScriptSettings(container)
+            elif t == config.ConfigType.CLASSIFY:
+                self._getClassifySettings(container)
             else:
                 _logger.error("invalid config type", t)
             #else
@@ -514,6 +527,17 @@ class CommandLineParser:
 
         self.config[config.ConfigType.SCRIPT] = conf
     #_getScriptSettings
+
+
+    def _getClassifySettings(self, container):
+        conf = config.Classify()
+        conf.images = container.i
+        conf.mute = container.m
+        if conf.images and conf.mute:
+            _warning("using photo viewer; ignoring -m")
+        #if
+        self.config[config.ConfigType.CLASSIFY] = conf
+    #_getClassifySettings
 
 #CommandLineParser
 

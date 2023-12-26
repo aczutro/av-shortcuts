@@ -25,7 +25,9 @@ from czutils.utils import czcode
 class ConfigType:
     """"Enum class" for config types.
     """
-    GENERAL, VIDEO, AUDIO, CROPPING, SCALING, CUTTING, PROBING, SCRIPT = range(8)
+    GENERAL, VIDEO, AUDIO, \
+        CROPPING, SCALING, CUTTING, \
+        PROBING, SCRIPT, CLASSIFY = range(9)
 #ConfigType
 
 
@@ -108,6 +110,15 @@ class Script:
         self.cTemplate = False
     #__init
 #Script
+
+
+@czcode.autoStr
+class Classify:
+    def __init__(self):
+        self.images = False
+        self.mute = False
+    #__init
+#Classify
 
 
 ### aczutro ###################################################################

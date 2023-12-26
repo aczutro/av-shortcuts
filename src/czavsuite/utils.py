@@ -70,14 +70,16 @@ class SystemCaller:
     #stdout
 
 
-    def call(self, args: list):
+    def call(self, args: list) -> int:
         P = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = P.communicate()
         self._stdout = stdout.decode(errors="ignore")
         self._stderr = stderr.decode(errors="ignore")
-        if P.returncode and self._doRaise:
+        if P.returncode:
             _logger.warning("'%s'" % " ".join(args), "returned", P.returncode)
-            raise UtilsError(self._stderr)
+            if self._doRaise:
+                raise UtilsError(self._stderr)
+            #if
         #if
         return P.returncode
     #def

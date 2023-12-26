@@ -19,7 +19,9 @@
 
 """av-script implementation"""
 
-from . import config
+from . import config, utils
+import os
+import shutil
 
 
 def avScript(files: list, conf: config.Script):
@@ -46,6 +48,46 @@ def avScript(files: list, conf: config.Script):
 
     print("script saved to '%s'" % conf.wilma)
 #avScript
+
+
+def avClassify(files: list, conf: config.Classify):
+    """
+    """
+    S = utils.SystemCaller(False)
+    if conf.images:
+        cmd = [ 'feh', '-g', '+1280+0' ]
+        if os.environ.get('AV_CLASS_VIEWER') is not None:
+            cmd = os.environ.get('AV_CLASS_VIEWER').split(sep=' ')
+        #if
+    else:
+        cmd = [ 'mplayer', '-geometry', '+1280+0' ]
+        if conf.mute:
+            cmd += [ '-ao', 'null' ]
+        #if
+        if os.environ.get('AV_CLASS_PLAYER') is not None:
+            cmd = os.environ.get('AV_CLASS_PLAYER').split(sep=' ')
+        #if
+    #else
+    for file in files:
+        S.call(cmd + [file])
+        try:
+            target = ".%s" % input("%s: " % file)
+        except EOFError:
+            break
+        #except
+        if target == ".":
+            continue
+        #if
+        try:
+            os.mkdir(target)
+        except FileExistsError as e:
+            if not os.path.isdir(target):
+                raise e
+            #if
+        #except
+        shutil.move(file, target)
+    #for
+#avClassify
 
 
 ### aczutro ###################################################################

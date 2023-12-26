@@ -59,6 +59,9 @@ class Application:
         except convert.ConvertError as e:
             _stderr(e)
             sys.exit(1)
+        except OSError as e:
+            _stderr(e)
+            sys.exit(1)
         #except
     #__init__
 
@@ -193,6 +196,32 @@ class ApplicationScript(Application):
     def _execute(self):
         try:
             scripts.avScript(self.inputFiles, self.config[config.ConfigType.SCRIPT])
+        except KeyError as e:
+            _logger.error("invalid config")
+            raise e
+        #except
+    #_execute
+
+#ApplicationScript
+
+
+class ApplicationClassify(Application):
+    """entry point for av-classify
+    """
+    def __init__(self):
+        """constructor
+        """
+        appDescription = ("Video and image classification helper.  In order to replace the default "
+                          "media player command, set the environment variable AV_CLASS_PLAYER. "
+                          "To replace the default image viewer, set AV_CLASS_VIEWER.")
+        configTypes = [ config.ConfigType.CLASSIFY ]
+        super().__init__(appDescription, configTypes)
+    #__init__
+
+
+    def _execute(self):
+        try:
+            scripts.avClassify(self.inputFiles, self.config[config.ConfigType.CLASSIFY])
         except KeyError as e:
             _logger.error("invalid config")
             raise e

@@ -29,6 +29,7 @@ av-probe = "czavsuite:mainProbe"
 av-convert = "czavsuite:mainConvert"
 av-play = "czavsuite:mainPlay"
 av-script = "czavsuite:mainScript"
+av-classify = "czavsuite:mainClassify"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
