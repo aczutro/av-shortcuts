@@ -28,6 +28,7 @@ _logger = czlogging.LoggingChannel("czavsuite.clp",
                                    czlogging.LoggingLevel.SILENT,
                                    colour=True)
 
+
 def setLoggingOptions(level: int, colour=True) -> None:
     """
     Sets this module's logging level.  If not called, the logging level is

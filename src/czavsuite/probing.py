@@ -19,14 +19,15 @@
 
 """av-probe implementation"""
 
-from . import config, utils
-from czutils.utils import cztext, czlogging
+from . import config
+from czutils.utils import cztext, czlogging, czsystem, czstrutils
 from builtins import ValueError
 
 
 _logger = czlogging.LoggingChannel("czavsuite.probing",
                                    czlogging.LoggingLevel.SILENT,
                                    colour=True)
+
 
 def setLoggingOptions(level: int, colour=True) -> None:
     """
@@ -61,16 +62,16 @@ def _ffprobeDict(lines: list):
 def ffprobe(file: str, mode: int):
     """
     """
-    S = utils.SystemCaller(True)
+    S = czsystem.SystemCaller(True)
 
     if mode == config.Probing.FULL:
         returnCode = S.call(['ffprobe', '-hide_banner', file])
         _logger.info("return code:", returnCode)
         _logger.info("stdout:", S.stdout())
         _logger.info("stderr:", S.stderr())
-        return utils.grep("Video|Audio",
-                          utils.grep("Stream", S.stderr()),
-                          colour=True)
+        return czstrutils.grep("Video|Audio",
+                               czstrutils.grep("Stream", S.stderr()),
+                               colour=True)
     elif mode == config.Probing.VIDEO or mode == config.Probing.AUDIO:
         returnCode = S.call(['ffprobe', '-hide_banner',
                              '-show_streams', '-select_streams',
@@ -85,7 +86,7 @@ def ffprobe(file: str, mode: int):
         _logger.info("return code:", returnCode)
         _logger.info("stdout:", S.stdout())
         _logger.info("stderr:", S.stderr())
-        return utils.grep("Duration", S.stderr())[0].split(sep=',')[0].split(sep=' ')[3]
+        return czstrutils.grep("Duration", S.stderr())[0].split(sep=',')[0].split(sep=' ')[3]
     else:
         raise ValueError
     #else

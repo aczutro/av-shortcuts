@@ -20,7 +20,7 @@ license = "GPL-3.0-or-later"
 
 [tool.poetry.dependencies]
 python  = "^3.10"
-czutils = "^1.4.0"
+czutils = "^1.4.1"
 
 [tool.poetry.dev-dependencies]
 

@@ -19,14 +19,15 @@
 
 """av-convert and av-play implementation"""
 
-from . import config, probing, utils
-from czutils.utils import czlogging
+from . import config, probing
+from czutils.utils import czlogging, czsystem
 import os.path
 
 
 _logger = czlogging.LoggingChannel("czavsuite.convert",
                                    czlogging.LoggingLevel.SILENT,
                                    colour=True)
+
 
 def setLoggingOptions(level: int, colour=True) -> None:
     """
@@ -197,7 +198,7 @@ def avConvert(files: list,
               confCropping: config.Cropping,
               confScaling: config.Scaling,
               confCutting: config.Cutting):
-    S = utils.SystemCaller(True)
+    S = czsystem.SystemCaller(True)
     ans = 0
     for file in files:
         outputFile = _outputFilename(file, confVideo.codec, confAudio.codec)
@@ -215,7 +216,7 @@ def avConvert(files: list,
                 _logger.info("stderr:", S.stderr())
                 print(S.stderr())
                 print("=======================")
-            except utils.UtilsError as e:
+            except czsystem.SystemCallError as e:
                 raise ConvertError(e)
             #except
         #if
@@ -228,7 +229,7 @@ def avPlay(files: list,
            confCropping: config.Cropping,
            confScaling: config.Scaling,
            confCutting: config.Cutting):
-    S = utils.SystemCaller(True)
+    S = czsystem.SystemCaller(True)
     ans = 0
     for file in files:
         cmd = ([ 'ffplay', '-hide_banner', file ] + _toFFmpegCropping(confCropping) +
@@ -241,7 +242,7 @@ def avPlay(files: list,
             _logger.info("stdout:", S.stdout())
             _logger.info("stderr:", S.stderr())
             print(S.stderr())
-        except utils.UtilsError as e:
+        except czsystem.SystemCallError as e:
             raise ConvertError(e)
         #except
     #for

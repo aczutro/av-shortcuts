@@ -19,7 +19,8 @@
 
 """av-script implementation"""
 
-from . import config, utils
+from . import config
+from czutils.utils import czsystem
 import os
 import shutil
 
@@ -53,7 +54,7 @@ def avScript(files: list, conf: config.Script):
 def avClassify(files: list, conf: config.Classify):
     """
     """
-    S = utils.SystemCaller(False)
+    S = czsystem.SystemCaller(False)
     if conf.images:
         cmd = [ 'feh', '-g', '+1280+0' ]
         if os.environ.get('AV_CLASS_VIEWER') is not None:
@@ -79,7 +80,7 @@ def avClassify(files: list, conf: config.Classify):
             continue
         #if
 
-        utils.mkdir(target, p=True)
+        czsystem.mkdir(target, p=True)
         shutil.move(file, target)
     #for
 #avClassify
@@ -94,11 +95,11 @@ def avRename(conf: config.Rename):
         os.rename(fro, toFull)
     #_mv
 
-    utils.mkdir(conf.target, p=True)
+    czsystem.mkdir(conf.target, p=True)
 
-    for file in [ _entry.name for _entry in os.scandir(os.curdir) \
+    for file in [ _entry.name for _entry in os.scandir(os.curdir)
                   if _entry.is_file() and not _entry.name[0] == '.']:
-        head, tail = utils.filenameSplit(file)
+        head, tail = czsystem.filenameSplit(file)
         if tail == conf.extension:
             new = "%s-new.%s" % (head, tail)
             if os.path.exists(new):

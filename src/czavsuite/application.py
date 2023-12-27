@@ -19,7 +19,7 @@
 
 """main application classes"""
 
-from . import clp, config, probing, convert, utils, scripts
+from . import clp, config, probing, convert, scripts
 from czutils.utils import czlogging, czsystem
 import sys
 
@@ -30,7 +30,6 @@ _logger = czlogging.LoggingChannel(czsystem.appName(),
 clp.setLoggingOptions(czlogging.LoggingLevel.ERROR)
 convert.setLoggingOptions(czlogging.LoggingLevel.ERROR)
 probing.setLoggingOptions(czlogging.LoggingLevel.ERROR)
-utils.setLoggingOptions(czlogging.LoggingLevel.ERROR)
 
 
 def _stderr(err: str):
@@ -107,7 +106,7 @@ class ApplicationProbe(Application):
         except KeyError as e:
             _logger.error("invalid config")
             raise e
-        except utils.UtilsError as e:
+        except czsystem.SystemCallError as e:
             _stderr(e)
         #except
     #_execute
