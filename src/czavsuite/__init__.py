@@ -61,4 +61,11 @@ def mainClassify():
 #mainClassify
 
 
+def mainRename():
+    """entry point for av-rename
+    """
+    application.ApplicationRename()
+#mainRename
+
+
 ### aczutro ###################################################################

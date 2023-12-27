@@ -21,6 +21,7 @@
 """
 
 from czutils.utils import czlogging, cztext
+import os
 import re
 import subprocess
 
@@ -113,3 +114,53 @@ def grep(pattern: str, text, ignoreCase=False, colour=False):
     #for
     return ans
 #grep
+
+
+def mkdir(path: str, p = False):
+    if path == "":
+        raise ValueError
+    #if
+    if path != os.path.sep and path[-1] == os.path.sep:
+        path = path[:-1]
+    #if
+    try:
+        os.mkdir(path)
+    except FileExistsError as e:
+        if not (os.path.isdir(path) and p):
+            raise e
+        #if
+    except FileNotFoundError as e:
+        parent = os.path.dirname(path)
+        if p and parent != path:
+            mkdir(parent, p)
+            mkdir(path, p)
+        else:
+            raise e
+        #else
+    #except
+#mkdir
+
+
+def filenameSplit(filename: str) -> tuple:
+    tokens = filename.split(sep='.')
+    if len(tokens) < 2:
+        return (filename, "")
+    else:
+        return (".".join(tokens[:-1]), tokens[-1])
+    #else
+#filenameSplit
+
+
+def isHidden(path: str) -> bool:
+    if path == "":
+        raise ValueError
+    #if
+    a, b = os.path.split(path)
+    if b == "":
+        a, b = os.path.split(a)
+    #if
+    return len(b) and b[0] == '.'
+#isHidden
+
+
+### aczutro ###################################################################

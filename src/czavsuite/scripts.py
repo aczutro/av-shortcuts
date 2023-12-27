@@ -78,16 +78,42 @@ def avClassify(files: list, conf: config.Classify):
         if target == ".":
             continue
         #if
-        try:
-            os.mkdir(target)
-        except FileExistsError as e:
-            if not os.path.isdir(target):
-                raise e
-            #if
-        #except
+
+        utils.mkdir(target, p=True)
         shutil.move(file, target)
     #for
 #avClassify
+
+
+def avRename(conf: config.Rename):
+    """
+    """
+    def _mv(fro: str, to: str):
+        toFull = os.path.join(conf.target, to)
+        print("%s -> %s" % (fro, toFull))
+        os.rename(fro, toFull)
+    #_mv
+
+    utils.mkdir(conf.target, p=True)
+
+    for file in [ _entry.name for _entry in os.scandir(os.curdir) \
+                  if _entry.is_file() and not _entry.name[0] == '.']:
+        head, tail = utils.filenameSplit(file)
+        if tail == conf.extension:
+            new = "%s-new.%s" % (head, tail)
+            if os.path.exists(new):
+                _mv(file, ".%s" % file)
+                _mv(new, file)
+            #if
+        else:
+            new = ".".join([ head, conf.extension ])
+            if os.path.exists(new):
+                _mv(file, ".%s" % file)
+                _mv(new, new)
+            #if
+        #else
+    #for
+#avRename
 
 
 ### aczutro ###################################################################

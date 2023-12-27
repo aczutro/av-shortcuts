@@ -64,23 +64,20 @@ class CommandLineParser:
     :param appDescription:  app description for help text
     :param configTypes:     list of OptionIDs to include
     """
-    def __init__(self, appDescription: str, configTypes: list):
+    def __init__(self, appDescription: str, configTypes: list, requireFiles):
         self.args = []
         self.config = {}
 
         parser = argparse.ArgumentParser(description=appDescription,
                                          add_help=False)
 
-        generalGroup = parser.add_argument_group()
-        videoGroup = parser.add_argument_group()
-        audioGroup = parser.add_argument_group()
-        transGroup = parser.add_argument_group()
-
-        parser.add_argument("FILE",
-                            type=str,
-                            nargs="+",
-                            help="audio or video file"
-                            )
+        if requireFiles:
+            parser.add_argument("FILE",
+                                type=str,
+                                nargs="+",
+                                help="audio or video file"
+                                )
+        #if
 
         parser.add_argument("--help",
                             action="help",
@@ -91,12 +88,14 @@ class CommandLineParser:
                             help="show version number and exit")
 
         if config.ConfigType.GENERAL in configTypes:
+            generalGroup = parser.add_argument_group()
             generalGroup.add_argument("-dry",
                                       action="store_true",
                                       help="only print FFmpeg command line; don't execute it"
                                       )
         #if
         if config.ConfigType.VIDEO in configTypes:
+            videoGroup = parser.add_argument_group()
             videoGroup.add_argument("-avc",
                                     dest="vCodec",
                                     action="store_const",
@@ -127,6 +126,7 @@ class CommandLineParser:
                                     )
         #if
         if config.ConfigType.AUDIO in configTypes:
+            audioGroup = parser.add_argument_group()
             audioGroup.add_argument("-mp3",
                                     dest="aCodec",
                                     action="store_const",
@@ -163,6 +163,7 @@ class CommandLineParser:
                                          config.Audio().quality
                                     )
         #if
+        transGroup = parser.add_argument_group()
         if config.ConfigType.CROPPING in configTypes:
             transGroup.add_argument("-c",
                                     metavar="LEFT[:RIGHT]:UP[:DOWN]",
@@ -262,6 +263,29 @@ class CommandLineParser:
                                      help="mute media player (ignored if AV_CLASS_PLAYER is set)"
                                      )
         #if
+        if config.ConfigType.RENAME in configTypes:
+            renameGroup = parser.add_argument_group()
+            renameGroup.add_argument("-m4a",
+                                     dest="extension",
+                                     action="store_const",
+                                     const="m4a",
+                                     default="mp4",
+                                     help="process m4a after files (default: mp4)"
+                                     )
+            renameGroup.add_argument("-mp3",
+                                     dest="extension",
+                                     action="store_const",
+                                     const="mp3",
+                                     default="mp4",
+                                     help="process mp3 after files (default: mp4)"
+                                     )
+            renameGroup.add_argument("-target",
+                                     metavar="DIRECTORY",
+                                     type=str,
+                                     help="move files to this directory (default: %s)" %
+                                          config.Rename().target
+                                     )
+        #if
 
         try:
             container = parser.parse_args()
@@ -269,7 +293,9 @@ class CommandLineParser:
             raise CommandLineError(e)
         #except
 
-        self.args = container.FILE
+        if requireFiles:
+            self.args = container.FILE
+        #if
         self._cropAndScale = 0
         self._noOutput = 0
 
@@ -292,6 +318,8 @@ class CommandLineParser:
                 self._getScriptSettings(container)
             elif t == config.ConfigType.CLASSIFY:
                 self._getClassifySettings(container)
+            elif t == config.ConfigType.RENAME:
+                self._getRenameSettings(container)
             else:
                 _logger.error("invalid config type", t)
             #else
@@ -538,6 +566,16 @@ class CommandLineParser:
         #if
         self.config[config.ConfigType.CLASSIFY] = conf
     #_getClassifySettings
+
+
+    def _getRenameSettings(self, container):
+        conf = config.Rename()
+        conf.extension = container.extension
+        if container.target is not None:
+            conf.target = container.target
+        #if
+        self.config[config.ConfigType.RENAME] = conf
+    #_getRenameSettings
 
 #CommandLineParser
 

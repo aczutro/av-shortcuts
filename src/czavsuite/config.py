@@ -27,7 +27,7 @@ class ConfigType:
     """
     GENERAL, VIDEO, AUDIO, \
         CROPPING, SCALING, CUTTING, \
-        PROBING, SCRIPT, CLASSIFY = range(9)
+        PROBING, SCRIPT, CLASSIFY, RENAME = range(10)
 #ConfigType
 
 
@@ -117,6 +117,15 @@ class Classify:
     def __init__(self):
         self.images = False
         self.mute = False
+    #__init
+#Classify
+
+
+@czcode.autoStr
+class Rename:
+    def __init__(self):
+        self.extension = "mp4"
+        self.target = ".avrename"
     #__init
 #Classify
 
