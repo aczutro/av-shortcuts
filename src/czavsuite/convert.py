@@ -119,7 +119,11 @@ def _toFFmpegVideo(conf: config.Video) -> list:
     else:
         raise ValueError
     #else
-    return [ "-c:v", codec, "-crf", conf.crf ]
+    ans = [ "-c:v", codec, "-crf", conf.crf ]
+    if conf.fps is not None:
+        ans += [ '-r', conf.fps ]
+    #if
+    return ans
 #_toFFmpegVideo
 
 

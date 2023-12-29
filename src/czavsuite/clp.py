@@ -125,6 +125,12 @@ class CommandLineParser:
                                     help="video quality: 0 is best, 51 is worst (default: %s)" %
                                          config.Video().crf
                                     )
+            videoGroup.add_argument("-vf",
+                                    metavar="FPS",
+                                    dest="fps",
+                                    type=int,
+                                    help="video frames per second (default: as in input stream)"
+                                    )
         #if
         if config.ConfigType.AUDIO in configTypes:
             audioGroup = parser.add_argument_group()
@@ -358,9 +364,24 @@ class CommandLineParser:
                 _warning("no video output; ignoring -vq")
             elif container.crf < 0 or container.crf > 51:
                 raise CommandLineError("CRF must be between 0 and 51")
-            #if
-            conf.crf = str(container.crf)
+            else:
+                conf.crf = str(container.crf)
+            #else
         #if
+
+        if container.fps is not None:
+            if conf.codec == "copy":
+                _warning("copying input video without transcoding; ignoring -vf")
+            elif conf.codec == "null":
+                _warning("no video output; ignoring -vf")
+            elif container.fps < 1:
+                raise CommandLineError("FPS must be greater than 0")
+            else:
+                conf.fps = str(container.fps)
+            #else
+        else:
+            conf.fps = None
+        #else
 
         self.config[config.ConfigType.VIDEO] = conf
     #_getVideoSettings

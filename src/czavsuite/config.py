@@ -44,6 +44,7 @@ class Video:
     def __init__(self):
         self.codec = "h265"
         self.crf = "23"
+        self.fps = "30"
     #__init
 #Video
 
