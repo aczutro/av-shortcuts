@@ -201,6 +201,13 @@ class CommandLineParser:
         #if
         if config.ConfigType.PROBING in configTypes:
             probeGroup = parser.add_argument_group()
+            probeGroup.add_argument("-f",
+                                    dest="probingMode",
+                                    action="store_const",
+                                    const=config.Probing.FULL,
+                                    default=config.Probing.FULL,
+                                    help="print full video and audio information"
+                                    )
             probeGroup.add_argument("-v",
                                     dest="probingMode",
                                     action="store_const",
