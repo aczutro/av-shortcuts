@@ -129,8 +129,8 @@ class TableMaker:
 
     def addHeader(self, mode: int):
         if mode == config.Probing.VIDEO:
-            self._table.append([ "codec", "resolution", "aspect ratio", "fps", "file" ])
-            self._table.append([ "-----", "----------", "------------", "---", "----" ])
+            self._table.append([ "codec", "resolution", "aspect ratio", "fps", "bitrate", "file" ])
+            self._table.append([ "-----", "----------", "------------", "---", "-------", "----" ])
         elif mode == config.Probing.AUDIO:
             self._table.append([ "codec", "sample rate", "layout", "bitrate", "file" ])
             self._table.append([ "-----", "-----------", "------", "-------", "----" ])
@@ -145,6 +145,11 @@ class TableMaker:
     def addVideo(self, file: str, probe: dict):
         try:
             try:
+                bitRate = "%d kb/s" % (float(probe["bit_rate"]) / 1000)
+            except ValueError:
+                bitRate = probe["bit_rate"]
+            #except
+            try:
                 framerateTokens = probe["avg_frame_rate"].split(sep='/')
                 num = float(framerateTokens[0])
                 den = float(framerateTokens[1])
@@ -158,9 +163,10 @@ class TableMaker:
                                  "%sx%s" % (probe["width"], probe["height"]),
                                  probe["display_aspect_ratio"],
                                  framerate,
+                                 bitRate,
                                  file ])
         except KeyError:
-            self._table.append([ 'null', '--', '--', '--', file ])
+            self._table.append([ 'null', '--', '--', '--', '--', file ])
         #except
     #addVideo
 
