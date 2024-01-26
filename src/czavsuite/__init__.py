@@ -20,7 +20,7 @@
 """A suite of useful scripts to serialise FFmpeg jobs
 """
 __author__ = "Alexander Czutro <github@czutro.ch>"
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 
 
 from . import application

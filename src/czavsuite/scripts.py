@@ -70,10 +70,15 @@ def avClassify(files: list, conf: config.Classify):
         #if
     #else
     for file in files:
+        print(f"{file}: ", end="", flush=True)
         S.call(cmd + [file])
         try:
-            target = ".%s" % input("%s: " % file)
+            target = ".%s" % input()
         except EOFError:
+            print()
+            break
+        except KeyboardInterrupt:
+            print()
             break
         #except
         if target == ".":

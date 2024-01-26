@@ -12,7 +12,7 @@
 
 [tool.poetry]
 name = "czavsuite"
-version = "2.0.2"
+version = "2.0.3"
 description = "A suite of useful scripts to serialise FFmpeg jobs"
 authors = ["Alexander Czutro <github@czutro.ch>"]
 homepage = "https://github.com/aczutro/czavsuite"
