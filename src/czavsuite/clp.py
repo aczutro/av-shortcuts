@@ -268,6 +268,24 @@ class CommandLineParser:
         #if
         if config.ConfigType.CLASSIFY in configTypes:
             scriptGroup = parser.add_argument_group()
+            scriptGroup.add_argument("-a",
+                                     dest="sorting",
+                                     action="store_const",
+                                     const=config.Classify.Sorting.ALPHA,
+                                     default=config.Classify.Sorting.NONE,
+                                     help="sort files alphabetically (default: no sorting)"
+                                     )
+            scriptGroup.add_argument("-d",
+                                     dest="sorting",
+                                     action="store_const",
+                                     const=config.Classify.Sorting.DATE,
+                                     default=config.Classify.Sorting.NONE,
+                                     help="sort files by date (default: no sorting)"
+                                     )
+            scriptGroup.add_argument("-r",
+                                     action="store_true",
+                                     help="process files in reverse order"
+                                     )
             scriptGroup.add_argument("-i",
                                      action="store_true",
                                      help="use image viewer instead of media player"
@@ -588,6 +606,8 @@ class CommandLineParser:
 
     def _getClassifySettings(self, container):
         conf = config.Classify()
+        conf.sorting = container.sorting
+        conf.reverse = container.r
         conf.images = container.i
         conf.mute = container.m
         if conf.images and conf.mute:

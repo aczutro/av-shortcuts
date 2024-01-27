@@ -115,7 +115,13 @@ class Script:
 
 @czcode.autoStr
 class Classify:
+    class Sorting:
+        NONE, ALPHA, DATE = range(3)
+    #Sorting
+
     def __init__(self):
+        self.sorting = self.Sorting.NONE
+        self.reverse = False
         self.images = False
         self.mute = False
     #__init

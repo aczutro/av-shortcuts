@@ -51,6 +51,24 @@ def avScript(files: list, conf: config.Script):
 #avScript
 
 
+def _sort(files: list, sorting: int, reverse: bool) -> list:
+    if sorting == config.Classify.Sorting.NONE:
+        if reverse:
+            files.reverse()
+        #if
+    elif sorting == config.Classify.Sorting.ALPHA:
+        files.sort(reverse=reverse)
+    elif sorting == config.Classify.Sorting.DATE:
+        filesWithKey = [ (os.path.getmtime(file), file) for file in files ]
+        filesWithKey.sort(reverse=reverse)
+        files = [ file for key, file in filesWithKey ]
+    else:
+        raise ValueError("invalid sorting value")
+    #else
+    return files
+#_sort
+
+
 def avClassify(files: list, conf: config.Classify):
     """
     """
@@ -69,7 +87,8 @@ def avClassify(files: list, conf: config.Classify):
             cmd = os.environ.get('AV_CLASS_PLAYER').split(sep=' ')
         #if
     #else
-    for file in files:
+
+    for file in _sort(files, conf.sorting, conf.reverse):
         print(f"{file}: ", end="", flush=True)
         S.call(cmd + [file])
         try:
