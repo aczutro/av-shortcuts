@@ -62,7 +62,7 @@ class Audio:
 @czcode.autoStr
 class Cropping:
     def __init__(self):
-        self.valid = False
+        self.valid = False # if true, was given in the command line
         self.left = 0
         self.right = 0
         self.up = 0
@@ -74,7 +74,7 @@ class Cropping:
 @czcode.autoStr
 class Scaling:
     def __init__(self):
-        self.valid = False
+        self.valid = False # if true, was given in the command line
         self.factor = 1.0
     #__init
 #Scaling
@@ -83,7 +83,7 @@ class Scaling:
 @czcode.autoStr
 class Cutting:
     def __init__(self):
-        self.valid = False
+        self.valid = False # if true, was given in the command line
         self.start = 0.0
         self.end = 1.0
     #__init

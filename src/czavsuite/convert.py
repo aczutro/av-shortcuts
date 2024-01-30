@@ -184,11 +184,20 @@ def _toFFmpegScaling(file: str, conf: config.Scaling) -> list:
 
 def _toFFmpegCuttting(conf: config.Cutting) -> list:
     if conf.valid:
-        diff = conf.end - conf.start
-        if diff <= 0:
+        if conf.start is None and conf.end is None:
             raise ValueError
-        #if
-        return [ "-ss", str(conf.start), "-t", str(diff) ]
+        elif conf.end is None:
+            return [ "-ss", str(conf.start) ]
+        elif conf.start is None:
+            return [ "-t", str(conf.end) ]
+        else:
+            diff = conf.end - conf.start
+            if diff <= 0:
+                raise ValueError
+            else:
+                return [ "-ss", str(conf.start), "-t", str(diff) ]
+            #else
+        #else
     else:
         return []
     #else
