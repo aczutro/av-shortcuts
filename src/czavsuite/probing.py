@@ -158,6 +158,8 @@ class TableMaker:
                 framerate = probe["avg_frame_rate"]
             except ValueError:
                 framerate = probe["avg_frame_rate"]
+            except ZeroDivisionError:
+                framerate = probe["avg_frame_rate"]
             #except
             self._table.append([ probe["codec_name"],
                                  "%sx%s" % (probe["width"], probe["height"]),
